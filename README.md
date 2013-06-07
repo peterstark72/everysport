@@ -4,7 +4,7 @@ Everysport API Python
 A Python wrapper for the Everysport API. 
 
 
-'''python
+´´´python
 
 import everysport
 
@@ -20,5 +20,5 @@ for event in allsvenskan.today().load():
 	print event
 
 
-'''
+´´´
 
