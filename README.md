@@ -1,7 +1,7 @@
 Everysport API Python 
 =====================
 
-A Python wrapper for the Everysport API. 
+A Python wrapper for the [Everysport API]('https://github.com/menmo/everysport-api-documentation'). 
 
 
 Example usage:
