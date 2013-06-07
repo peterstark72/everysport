@@ -7,7 +7,7 @@ A Python wrapper for the [Everysport API](https://github.com/menmo/everysport-ap
 Example usage:
 
 
-´´´
+```python
 import everysport
 
 events = everysport.Events(EVERYSPORT_APIKEY)
