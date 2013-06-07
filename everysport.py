@@ -11,26 +11,24 @@ EVERYSPORT_API_URL = "http://api.everysport.com/v1/{}"
 
 
 def get_resource(resource, params):
-	'''Makes a GET with defines params and returns result or None'''
-
 	encoded_params = urllib.urlencode(params)
 	url = EVERYSPORT_API_URL.format(resource) + '?' + encoded_params
-	try:
-		response = urllib.urlopen(url)
-		result = json.load(response)
-	except IOError:
-		return None
+
+	response = urllib.urlopen(url)
+	result = json.load(response)
 	
 	return result
 
 
 
 def get_list(resource, params):	
-	'''Generator, loads all events '''
-
 	done = False
-	while not done:			
-		result = get_resource(resource, params)
+	while not done:
+		try:			
+			result = get_resource(resource, params)
+		except:
+			raise StopIteration
+		
 		count = result['metadata']['count']
 		offset = result['metadata']['offset']
 		limit = result['metadata']['limit']
