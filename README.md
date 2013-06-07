@@ -1,4 +1,6 @@
-everysport-py
-=============
+Everysport API Python 
+=====================
 
-Python wrapper for the Everysport API 
+A Python wrapper for the Everysport API. 
+
+
