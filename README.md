@@ -7,17 +7,18 @@ A Python wrapper for the [Everysport API](https://github.com/menmo/everysport-ap
 Example usage:
 
 ´´´python
-	import everysport
+import everysport
 
-	events = everysport.Events(EVERYSPORT_APIKEY)
+events = everysport.Events(EVERYSPORT_APIKEY)
 
-	for event in events.today().load():
-		print event
+for event in events.today().load():
+	print event
 
 
-	allsvenskan = events.leagues(57973)
-	for event in allsvenskan.today().load():
-		print event
+allsvenskan = events.leagues(57973)
+for event in allsvenskan.today().load():
+	print event
+	
 ´´´
 
 
