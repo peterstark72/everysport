@@ -10,15 +10,13 @@ Example usage:
 ```python
 import everysport
 
-events = everysport.Events(EVERYSPORT_APIKEY)
+api = everysport.Api(EVERYSPORT_APIKEY)
 
-for event in events.today().load():
-	print event
+allsvenskan_games = api.events().leagues(57973)
 
-
-allsvenskan = events.leagues(57973)
-for event in allsvenskan.today().load():
-	print event
+for game in allsvenskan_games.load():
+	print game.start_date.strftime('%d/%m %H:%M')
+	print game.home_team.name, game.visiting_team.name 
 	
 ```
 

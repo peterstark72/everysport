@@ -5,6 +5,7 @@
 
 # Tests
 tests*
+examples*
 
 # Packages
 *.egg
