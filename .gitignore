@@ -3,9 +3,9 @@
 # C extensions
 *.so
 
-# Tests
-tests*
-examples*
+#Configurations
+config.json
+
 
 # Packages
 *.egg

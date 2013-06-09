@@ -212,6 +212,11 @@ class Event(object):
 		'''The status of the event'''
 		return self._status
 
+
+	def is_finished(self):
+		return self._status == "FINISHED"
+
+
 	@property
 	def home_team(self):
 		return self._home_team

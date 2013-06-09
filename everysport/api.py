@@ -12,6 +12,7 @@ class Api(object):
 		self.params['apikey'] = apikey
 
 	def events(self):
+		"""Returns a query """
 		return events.Events(self)
 
 	def leagues(self):
