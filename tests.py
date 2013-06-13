@@ -5,18 +5,16 @@ import unittest
 import everysport
 
 
-#The Everysport APIKEY is inside a JSON object in 'config.json': 
-#{"APIKEY" : {YOUR APIKEY}, "ALLSVENSKAN_LEAGUE_ID" : 57973 }  
-import json
-config = json.load(open('config.json'))
+EVERYSPORT_APIKEY = "{API_KEY}"
+
 
 class Everysport(unittest.TestCase):
 
 	def setUp(self):
-		self.api = everysport.Api(config['APIKEY'])
+		self.api = everysport.Api(EVERYSPORT_APIKEY)
 
 	def test_league_events(self):		
-		events = self.api.events().leagues(config['ALLSVENSKAN_LEAGUE_ID']).load()
+		events = self.api.events().leagues(everysport.ALLSVENSKAN_2013).load()
 		self.assertTrue(len(list(events)) >= 0)
 
 	def test_today(self):

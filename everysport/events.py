@@ -77,6 +77,10 @@ class Events(object):
 		self.filter['sport'] = ",".join(map(str, sports))
 		return self
 
+	def teams(self, *teams):
+		self.filter['team'] = ",".join(map(str,teams))
+		return self
+
 	
 
 

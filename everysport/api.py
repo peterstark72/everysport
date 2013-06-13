@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+
+
+
+
+'''
+
+
 import events
 import leagues
 import sports
@@ -12,16 +22,19 @@ class Api(object):
 		self.params['apikey'] = apikey
 
 	def events(self):
-		"""Returns a query """
+		"""Returns a query for all events"""
 		return events.Events(self)
 
 	def leagues(self):
+		"""Returns a query for all leagues"""
 		return leagues.Leagues(self)		
 
 	def sports(self):
+		"""Returns a query for all sports"""
 		return sports.Sports(self)	
 
 	def event(self, id):
+		"""Returns the event for id"""
 		return events.Event(self, id)
 
 	def get_json(self, endpoint, params=dict()):
