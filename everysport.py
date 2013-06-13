@@ -1,6 +1,161 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+
+A simple library that wraps the Everysport API. 
+
+
+Usage: 
+
+api = Api(EVERYSPORT_APIKEY)
+
+an_event = api.events().get(EVERYSPORT_EVENT_ID)
+
+events = api.events().all()
+
+
+'''
+
+
+import datetime
+import urllib
+import json
 
 #Used to parse RFC822 datetime string
 from dateutil.parser import parse
+
+
+BASE_API_URL = "http://api.everysport.com/v1/{}"
+
+class Api(object):
+	def __init__(self, apikey):
+		self.params = {}
+		self.params['apikey'] = apikey
+
+	def events(self):
+		"""Returns a query for all events"""
+		return EventsQuery(self)
+
+	def leagues(self):
+		"""Returns a query for all leagues"""
+		return LeaguesQuery()
+
+
+	def get_json(self, endpoint, params=dict()):
+		self.params.update(params)
+		encoded_params = urllib.urlencode(self.params)
+		url = BASE_API_URL.format(endpoint) + '?' + encoded_params	
+		response = urllib.urlopen(url)
+		return json.load(response)
+
+
+
+class Query(object):
+	def __init__(self, api):
+		self.api = api
+		self.query = {}
+
+
+class LeaguesQuery(Query):
+
+	def team_class(self, *team_classes):
+		self.query['teamClass'] = ",".join(map(str, team_classes))
+		return self
+
+
+	def sport(self, *sports):
+		self.query['sport'] = ",".join(map(str, sports))
+		return self
+
+
+	def all(self):
+		done = False
+		while not done:
+			try:	
+				result = self.api.get_json('leagues', self.query)
+			except:
+				raise StopIteration
+			
+			count = result['metadata']['count']
+			offset = result['metadata']['offset']
+			limit = result['metadata']['limit']
+
+			done = count == 0 
+			if not done:
+				for ev in result.get('leagues',[]):
+					yield Event().from_json(ev)
+				self.query['offset'] = offset + count
+			done = count < limit		
+
+
+class EventsQuery(Query):
+
+	def get(self, resource_id):
+		try:
+			endpoint = 'events/' + str(resource_id)
+			result = self.api.get_json(endpoint, self.query)
+		except:
+			return None
+
+		return Event().from_json(result.get('event',{}))
+
+
+	def all(self):
+		done = False
+		while not done:
+			try:	
+				result = self.api.get_json('events', self.query)
+			except:
+				raise StopIteration
+			
+			count = result['metadata']['count']
+			offset = result['metadata']['offset']
+			limit = result['metadata']['limit']
+
+			done = count == 0 
+			if not done:
+				for ev in result.get('events',[]):
+					yield Event().from_json(ev)
+				self.query['offset'] = offset + count
+			done = count < limit
+	
+
+	def fromdate(self, d):
+		self.query['fromDate'] = d
+		return self
+
+	
+	def todate(self, d):
+		self.query['toDate'] = d
+		return self
+
+
+	def today(self):
+		today = datetime.date.today()
+		self.query['toDate'] = self.query['fromDate'] = today.strftime('%Y-%m-%d')
+		return self 
+
+
+	def status(self, *status):
+		self.query['status'] = ",".join(status)
+		return self	
+
+
+	def leagues(self, *leagues):
+		self.query['league'] = ",".join(map(str, leagues))
+		return self
+
+
+	def sport(self, *sports):
+		self.query['sport'] = ",".join(map(str, sports))
+		return self
+
+	def teams(self, *teams):
+		self.query['team'] = ",".join(map(str,teams))
+		return self
+
+
+
 
 class Team(object):
 
@@ -19,35 +174,17 @@ class Team(object):
 	def id(self):
 		return self._id
 
-	@id.setter
-	def id(self, x):
-		self._id = x 
-
-
 	@property
 	def link(self):
 		return self._link
-
-	@link.setter
-	def link(self, x):
-		self._link = x 		
-
 
 	@property
 	def name(self):
 		return self._name.encode('utf-8')
 
-	@name.setter
-	def name(self, x):
-		self._name = x 
-
 	@property
 	def short_name(self):
 		return self._short_name
-
-	@short_name.setter
-	def short_name(self, x):
-		self._short_name = x 
 
 
 	def from_json(self, data):
@@ -71,17 +208,11 @@ class Sport(object):
 	def id(self):
 		return self._id
 
-	@id.setter
-	def id(self, x):
-		self._id = x 
 
 	@property
 	def name(self):
 		return self._name
 
-	@name.setter
-	def name(self, x):
-		self._name = x 
 
 	def from_json(self, data):
 		return Sport(id=data.get('id', None),
@@ -100,17 +231,10 @@ class Arena(object):
 	def id(self):
 		return self._id
 
-	@id.setter
-	def id(self, x):
-		self._id = x 
 
 	@property
 	def name(self):
 		return self._name
-
-	@name.setter
-	def name(self, x):
-		self._name = x 
 
 	def from_json(self, data):
 		return Arena(id=data.get('id', None),
@@ -128,35 +252,21 @@ class League(object):
 		self._sport = sport
 		self._team_class = team_class
 
-
 	@property
 	def id(self):
 		return self._id
-
-	@id.setter
-	def id(self, x):
-		self._id = x 
 
 	@property
 	def name(self):
 		return self._name.encode('utf-8')
 
-	@name.setter
-	def name(self, x):
-		self._name = x 
-
 	@property
 	def sport(self):
 		return self._sport
 
-	@sport.setter
-	def sport(self, x):
-		self._sport = x 		
-
 	@property
 	def team_class(self):
 		return self._team_class
-
 
 	def from_json(self, data):
 		if 'sport' in data: 
@@ -174,6 +284,7 @@ class League(object):
 class Event(object):
 
 	def __init__(self, 
+		id=None,
 		start_date=None,
 		round=None,
 		status=None,
@@ -185,6 +296,7 @@ class Event(object):
 		arena=None,
 		spectators=None,
 		referees=None):
+		self._id = id
 		self._start_date = start_date
 		self._round = round
 		self._status = status
@@ -196,6 +308,16 @@ class Event(object):
 		self._arena=arena	
 		self._spectators=spectators
 		self._referees=referees
+
+
+	def __str__(self):
+		return "{} : {} - {}".format(self.start_date.strftime('%d/%m %H:%M'),
+						self.home_team.name, 
+						self.visiting_team.name)	
+
+	@property
+	def id(self):
+		return self._id
 
 
 	@property
@@ -253,6 +375,7 @@ class Event(object):
 		return self._referees
 
 
+
 	def from_json(self, data):
 
 		if 'homeTeam' in data:			
@@ -296,19 +419,4 @@ class Event(object):
 				spectators=spectators,
 				referees=referees
 			)
-
-
-
-def main():
-
-	ev = Event()
-	print ev.status
-	ev.status = "Upcoming"
-	print ev.status
-
-	print ev.start_date
-
-
-if __name__ == '__main__':
-	main()
 
