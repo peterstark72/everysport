@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import everysport
 
+EVERYSPORT_APIKEY = {APIKEY}
 
-EVERYSPORT_APIKEY = "{APIKEY}"
+#Lookup manually at everysport.com
 ALLSVENSKAN_2013 = 57973
 
 
@@ -13,7 +14,7 @@ def main():
 
 	allsvenskan_games = api.events().leagues(ALLSVENSKAN_2013)
 
-	for event in allsvenskan_games.status('UPCOMING').all():
+	for event in allsvenskan_games.upcoming().all():
 		print event
 
 

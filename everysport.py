@@ -20,12 +20,17 @@ events = api.events().all()
 import datetime
 import urllib
 import json
+import logging
 
 #Used to parse RFC822 datetime string
 from dateutil.parser import parse
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
+
+class EverysportException(Exception):
+	pass
+
 
 class Api(object):
 	def __init__(self, apikey):
@@ -42,11 +47,21 @@ class Api(object):
 
 
 	def get_json(self, endpoint, params=dict()):
+		'''GETs an endpoint or raises an exception'''
+		
 		self.params.update(params)
 		encoded_params = urllib.urlencode(self.params)
 		url = BASE_API_URL.format(endpoint) + '?' + encoded_params	
-		response = urllib.urlopen(url)
-		return json.load(response)
+
+
+		try:			
+			response = urllib.urlopen(url)
+			result = json.load(response)
+		except:
+			raise EverysportException("Could not load {}".format(url))
+		
+		return result 
+
 
 
 
@@ -54,6 +69,47 @@ class Query(object):
 	def __init__(self, api):
 		self.api = api
 		self.query = {}
+
+
+	def get(self, resource, resource_id):
+
+		endpoint = "{}s/{}".format(repr(resource), str(resource_id))
+
+		try:
+			result = self.api.get_json(endpoint, self.query)
+		except EverysportException as e:
+			logging.warning(e.message)
+			return None
+
+		event_json = result.get(repr(resource),{})
+
+		return resource().from_json(event_json)
+
+
+
+	def all(self, resource):
+
+		endpoint = repr(resource)+"s"
+
+		done = False
+		while not done:
+			try:	
+				result = self.api.get_json(endpoint, self.query)
+			except EverysportException as e:
+				logging.warning(e.message)
+				raise StopIteration
+			
+			count = result['metadata']['count']
+			offset = result['metadata']['offset']
+			limit = result['metadata']['limit']
+
+			done = count == 0 
+			if not done:
+				for ev in result.get(endpoint,[]):
+					yield resource.from_json(ev)
+				self.query['offset'] = offset + count
+			done = count < limit		
+
 
 
 class LeaguesQuery(Query):
@@ -69,55 +125,18 @@ class LeaguesQuery(Query):
 
 
 	def all(self):
-		done = False
-		while not done:
-			try:	
-				result = self.api.get_json('leagues', self.query)
-			except:
-				raise StopIteration
-			
-			count = result['metadata']['count']
-			offset = result['metadata']['offset']
-			limit = result['metadata']['limit']
+		return super(LeaguesQuery, self).all(League())
 
-			done = count == 0 
-			if not done:
-				for ev in result.get('leagues',[]):
-					yield Event().from_json(ev)
-				self.query['offset'] = offset + count
-			done = count < limit		
+
 
 
 class EventsQuery(Query):
 
-	def get(self, resource_id):
-		try:
-			endpoint = 'events/' + str(resource_id)
-			result = self.api.get_json(endpoint, self.query)
-		except:
-			return None
-
-		return Event().from_json(result.get('event',{}))
-
+	def get(self, event_id):
+		return super(EventsQuery, self).get(Event(), event_id)
 
 	def all(self):
-		done = False
-		while not done:
-			try:	
-				result = self.api.get_json('events', self.query)
-			except:
-				raise StopIteration
-			
-			count = result['metadata']['count']
-			offset = result['metadata']['offset']
-			limit = result['metadata']['limit']
-
-			done = count == 0 
-			if not done:
-				for ev in result.get('events',[]):
-					yield Event().from_json(ev)
-				self.query['offset'] = offset + count
-			done = count < limit
+		return super(EventsQuery, self).all(Event())
 	
 
 	def fromdate(self, d):
@@ -136,9 +155,19 @@ class EventsQuery(Query):
 		return self 
 
 
-	def status(self, *status):
-		self.query['status'] = ",".join(status)
-		return self	
+	def upcoming(self):
+		if 'status' in self.query:
+			self.query['status'] += ",UPCOMING"
+		else:
+			self.query['status'] = "UPCOMING"
+		return self
+
+	def finished(self):
+		if 'status' in self.query:
+			self.query['status'] += ",FINISHED"
+		else:
+			self.query['status'] = "FINISHED"
+		return self
 
 
 	def leagues(self, *leagues):
@@ -252,6 +281,10 @@ class League(object):
 		self._sport = sport
 		self._team_class = team_class
 
+
+	def __repr__(self):
+		return 'league'
+
 	@property
 	def id(self):
 		return self._id
@@ -310,6 +343,11 @@ class Event(object):
 		self._referees=referees
 
 
+	def __repr__(self):
+		return 'event'
+	
+
+
 	def __str__(self):
 		return "{} : {} - {}".format(self.start_date.strftime('%d/%m %H:%M'),
 						self.home_team.name, 
@@ -333,11 +371,6 @@ class Event(object):
 	def status(self):
 		'''The status of the event'''
 		return self._status
-
-
-	def is_finished(self):
-		return self._status == "FINISHED"
-
 
 	@property
 	def home_team(self):

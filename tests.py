@@ -5,7 +5,7 @@ import unittest
 import everysport
 
 
-EVERYSPORT_APIKEY = "{APIKEY}"
+EVERYSPORT_APIKEY = {APIKEY}
 
 ALLSVENSKAN_2013 = 57973
 
@@ -18,10 +18,15 @@ class Everysport(unittest.TestCase):
 		events = self.api.events().leagues(ALLSVENSKAN_2013).all()
 		self.assertTrue(len(list(events)) >= 0)
 
-	def test_today(self):
+	def test_today_events(self):
 		games = list(self.api.events().today().all())
 		self.assertTrue(len(games) >= 0)
 
+
+	def test_upcoming_events(self):
+		games = list(self.api.events().upcoming().all())
+		self.assertTrue(len(games) >= 0)
+	
 
 
 if __name__ == '__main__':
