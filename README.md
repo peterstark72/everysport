@@ -8,28 +8,25 @@ Example usage:
 
 
 ```python
-import everysport
-
-EVERYSPORT_APIKEY = {APIKEY}
-
-#Lookup manually at everysport.com
-ALLSVENSKAN_2013 = 57973
+api = everysport.Api(EVERYSPORT_APIKEY)
 
 
-def main():
+allsvenskan_events = api.events().leagues(ALLSVENSKAN_2013)
+allsvenskan_total =  api.standings(ALLSVENSKAN_2013).total()
 
-	api = everysport.Api(EVERYSPORT_APIKEY)
-
-	allsvenskan_games = api.events().leagues(ALLSVENSKAN_2013)
-
-	for event in allsvenskan_games.upcoming().all():
+#Today's games
+for event in allsvenskan_events.today().load():
 		print event
-
-
-
-if __name__ == '__main__':
-	main()
 	
+
+#Current standings
+for standing in allsvenskan_total.load():
+	print standing
+
+
+#Upcoming's games		
+for event in allsvenskan_events.upcoming().load():
+		print event	
 ```
 
 
