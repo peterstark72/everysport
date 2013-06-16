@@ -6,5 +6,5 @@ setup(name='everysport-py',
       author='Peter Stark',
       author_email='peterstark72@gmail.com',
       url='https://github.com/peterstark72/everysport-py',
-      scripts=['allsvenskan.py','everysport.py']
+      scripts=['everysport.py']
       )

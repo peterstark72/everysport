@@ -3,9 +3,6 @@
 # C extensions
 *.so
 
-#Configurations
-config.json
-
 
 # Packages
 *.egg
@@ -21,6 +18,16 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+MANIFEST
+
+
+#Tests
+tests*
+
+#Sublime
+*.sublime-project
+*.sublime-workspace
+
 
 # Installer logs
 pip-log.txt
