@@ -4,7 +4,7 @@ Everysport API Python
 A Python wrapper for the [Everysport API](https://github.com/menmo/everysport-api-documentation). 
 
 
-Create the API client, with your APIKEY from supper@everysport.com
+Create the API client, with your APIKEY from support@everysport.com
 
 ```python
 api = everysport.Api(EVERYSPORT_APIKEY)
