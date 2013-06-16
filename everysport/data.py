@@ -111,6 +111,9 @@ class Standings(list):
 				return standing.stats	
 
 	def from_json(self, data):
+
+		#TODO: Parse groups
+
 		
 		for s in data['groups'][0]['standings']:
 			self.append(Standing(
@@ -184,6 +187,10 @@ class League(object):
 
 class Event(object):
 
+	STATUS_FINISHED = "FINISHED"
+	STATUS_UPCOMING = "UPCOMING"
+	STATUS_PENDING = "PENDING"
+
 	def __init__(self, 
 		id=None,
 		start_date=None,
@@ -234,6 +241,10 @@ class Event(object):
 	def status(self):
 		'''The status of the event'''
 		return self._status
+
+
+	def is_finished(self):
+		return self.status == Event.STATUS_FINISHED
 
 	@property
 	def home_team(self):
