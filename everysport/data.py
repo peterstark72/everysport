@@ -104,22 +104,59 @@ class Team(object):
 					short_name=data.get('shortName', None))
 
 
-class Standings(list):
-	def get_stats_by_team(self, team_name):
-		for standing in self:
-			if team_name == standing.team.name:
-				return standing.stats	
+
+
+class Group(object):
+
+	def __init__(self,
+			labels=None,
+			standings=None):
+		self._labels = labels
+		self._standings = standings
+
+	@property
+	def labels(self):
+		return self._labels	
+
+	@property
+	def standings(self):
+		return self._standings	
+
+
+class Label(object):
+	def __init__(self,
+			name=None,
+			type=None):
+		self._name = name
+		self._type = type
+
+	def __str__(self):
+		return "{} ({})".format(unicode(self.name), self.type)
+
+	@property
+	def name(self):
+		return self._name	
+
+	@property
+	def type(self):
+		return self._type	
+
+
+class Labels(list):
+	def from_json(self, data):
+		for d in data:
+			self.append(Label(name=d.get('name'), type=d.get('type')))
+		return self
+
+
+
+class Groups(list):
 
 	def from_json(self, data):
-
-		#TODO: Parse groups
-
-		
-		for s in data['groups'][0]['standings']:
-			self.append(Standing(
-				stats=Stats().from_json(s.get('stats',[])),
-				team=Team().from_json(s.get('team', {}))))
-
+		for group in data.get('groups',[]):
+			self.append(Group(
+				labels=Labels().from_json(group.get('labels',[])),
+				standings=Standings().from_json(group['standings'])))
 		return self
 
 
@@ -141,6 +178,17 @@ class Standing(object):
 	@property
 	def stats(self):
 		return self._stats	
+
+
+class Standings(list):
+
+	def from_json(self, data):
+		for s in data:
+			self.append(Standing(
+				stats=Stats().from_json(s.get('stats',[])),
+				team=Team().from_json(s.get('team', {}))))
+
+		return self
 
 
 class League(object):

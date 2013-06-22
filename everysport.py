@@ -11,18 +11,13 @@ import everysport
 import argparse
 
 
-def write_data(league_id, data):
-	for d in data.get_all(league_id):
-		print d
-
-
 def main():
 	parser = argparse.ArgumentParser(description='Gets games and standings from everysport.com')
 	parser.add_argument('-key', '--apikey', action='store',
                    help='Your Everysport APIKEY', dest='apikey')
-	parser.add_argument('-t', '--tabell', dest='standings', action='store_true')
-	parser.add_argument('-k', '--kommande', dest='upcoming', action='store_true')
-	parser.add_argument('-d', '--idag', dest='today', action='store_true')
+	parser.add_argument('-s', '--standings', dest='standings', action='store_true')
+	parser.add_argument('-u', '--upcoming', dest='upcoming', action='store_true')
+	parser.add_argument('-t', '--today', dest='today', action='store_true')
 	parser.add_argument(dest='leagues', metavar='league',nargs='+')
 	args = parser.parse_args()
 
@@ -33,13 +28,24 @@ def main():
 	for league in args.leagues:
 		#Games today
 		if args.today:
-			write_data(league, api.events().today())
+			for d in api.events().today().get_all(league):
+				print d	
+
 		#Total standings
 		if args.standings:
-			write_data(league, api.standings().total())
+			for group in api.standings().total().get(league):
+				for label in group.labels:
+					print label.name,
+				print
+				for s in group.standings:
+					print s
+
+
 		#Upcoming games
 		if args.upcoming:
-			write_data(league, api.events().upcoming())
+			for d in api.events().upcoming().get_all(league):
+				print d	
+
 		
 
 if __name__ == '__main__':

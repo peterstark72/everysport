@@ -15,7 +15,7 @@ import json
 import logging
 
 from data import Event
-from data import Standings
+from data import Groups
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
@@ -79,16 +79,16 @@ class StandingsQuery(object):
 		self.query['round'] = x
 		return self	
 
-	def get_all(self, league_id):
+	def get(self, league_id):
 		'''Loads the standings from the API and returns a Standings object'''
 		endpoint = 'leagues/' + str(league_id) + '/standings'
 		
 		result = self.api.get_json(endpoint, self.query)
 
 		if result:
-			return Standings().from_json(result)
+			return Groups().from_json(result)
 		else: 
-			return Standings()
+			return Groups()
 
 
 
