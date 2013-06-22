@@ -29,11 +29,6 @@ ALLSVENSKAN = 57973
 #Today's games
 for event in events_today.get_all(ALLSVENSKAN):
 		print event
-	
-
-#Current standings
-for standing in standings_total.get_all(ALLSVENSKAN):
-	print standing
 
 
 #Upcoming's games		
