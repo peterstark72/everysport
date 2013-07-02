@@ -31,7 +31,7 @@ class Sport(object):
 
 	@property
 	def name(self):
-		return self._name.encode('utf-8')
+		return self._name
 
 
 	def from_json(self, data):
@@ -58,7 +58,7 @@ class Arena(object):
 
 	@property
 	def name(self):
-		return self._name.encode('utf-8')
+		return self._name
 
 	def from_json(self, data):
 		return Arena(id=data.get('id', None),
@@ -268,8 +268,13 @@ class Event(object):
 
 
 	def __str__(self):
-		return unicode(self.start_date.strftime('%d/%m %H:%M').ljust(15) + 
-						self.home_team.name.ljust(20) + self.visiting_team.name.ljust(20)).encode('utf-8')	
+
+		if self.is_finished():
+			return unicode(self.start_date.strftime('%d/%m %H:%M').ljust(15) + self.home_team.name.ljust(20) + str(self.home_team_score).ljust(5) + " " +self.visiting_team.name.ljust(20) + str(self.visiting_team_score).ljust(5)).encode('utf-8')
+		else:
+			return unicode(self.start_date.strftime('%d/%m %H:%M').ljust(15) + self.home_team.name.ljust(20)  +self.visiting_team.name.ljust(20)).encode('utf-8')
+
+
 
 	@property
 	def id(self):

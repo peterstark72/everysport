@@ -34,6 +34,12 @@ for event in events_today.get_all(ALLSVENSKAN):
 #Upcoming's games		
 for event in upcoming_events.get_all(ALLSVENSKAN):
 		print event	
+
+
+#Standnings, 
+for group in standings_total.get(ALLSVENSKAN):
+	for s in group.standings:
+		print s		
 ```
 
 
