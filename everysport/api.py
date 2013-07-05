@@ -86,7 +86,7 @@ class StandingsQuery(object):
 		result = self.api.get_json(endpoint, self.query)
 
 		if result:
-			return Groups().from_json(result)
+			return Groups(result)
 		else: 
 			return Groups()
 
@@ -104,7 +104,7 @@ class EventsQuery(object):
 		result = self.api.get_json(endpoint)
 		
 		if result:
-			return Event().from_json(result.get('event',{}))
+			return Event.from_json(result.get('event',{}))
 		else:
 			return None	
 
@@ -128,7 +128,7 @@ class EventsQuery(object):
 			done = count == 0 
 			if not done:
 				for ev in result.get('events',[]):
-					yield Event().from_json(ev)
+					yield Event.from_json(ev)
 				self.query['offset'] = offset + count
 			done = count < limit
 	

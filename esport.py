@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 '''
 
@@ -6,9 +6,9 @@ A CLI for Everysport.com.
 Lets you print games and standings
 
 '''
-
 import everysport
 import argparse
+
 
 
 def main():
@@ -24,7 +24,6 @@ def main():
 	parser.add_argument('-e', '--events', dest='events', nargs='+')
 	args = parser.parse_args()
 
-	
 	#Create an API client
 	api = everysport.Api(args.apikey)
 
