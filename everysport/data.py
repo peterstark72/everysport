@@ -185,8 +185,8 @@ class Event(DataObject):
 		else:
 			s += self.start_date.strftime("%d/%m %H:%M").ljust(15) + self.home_team.name.ljust(20)  +self.visiting_team.name.ljust(20)
 
-		if len(self.shots) > 0:
-			s += "\n" + self.shots
+		if self.facts and self.facts.shots:
+			s += "\n" + self.facts.shots
 
 		return s.encode('utf-8')	
 
