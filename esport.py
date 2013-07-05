@@ -6,16 +6,18 @@ A CLI for Everysport.com.
 Lets you print games and standings
 
 '''
-import everysport
+import os
 import argparse
+import logging
 
+import everysport
 
 
 def main():
 
 	parser = argparse.ArgumentParser(description='Gets games and standings from everysport.com')	
 	parser.add_argument('-key', '--apikey', action='store',
-                   help='Your Everysport APIKEY', dest='apikey')
+                   help='Your Everysport APIKEY', dest='apikey', nargs="?")
 	parser.add_argument('-s', '--standings', dest='standings', action='store_true')
 	parser.add_argument('-u', '--upcoming', dest='upcoming', action='store_true')
 	parser.add_argument('-r', '--results', dest='results', action='store_true')	
@@ -24,8 +26,17 @@ def main():
 	parser.add_argument('-e', '--events', dest='events', nargs='+')
 	args = parser.parse_args()
 
+
+	#Get API KEY
+	apikey = args.apikey
+	try: 
+		apikey = os.environ['EVERYSPORT_APIKEY']
+	except KeyError:
+		logging.info('No EVERYSPORT_APIKEY environment variable.')
+
+
 	#Create an API client
-	api = everysport.Api(args.apikey)
+	api = everysport.Api(apikey)
 
 	
 	#Get list of leagues, if provided

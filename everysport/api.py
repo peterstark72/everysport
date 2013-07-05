@@ -12,10 +12,9 @@ import datetime
 import urllib
 import urllib2
 import json
-import logging
 
 from data import Event
-from data import Groups
+from data import StandingGroupList
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
@@ -46,9 +45,9 @@ class Api(object):
 		try:	
 			response = urllib2.urlopen(url)
 			result = json.load(response)	
-		except urllib2.HTTPError as e:
-			logging.warning("Could not load {}. HTTP code: {}".format(url, e.code))
+		except:
 			return None
+			
 
 		return result
 
@@ -86,9 +85,9 @@ class StandingsQuery(object):
 		result = self.api.get_json(endpoint, self.query)
 
 		if result:
-			return Groups(result)
+			return StandingGroupList(result)
 		else: 
-			return Groups()
+			return []
 
 
 
@@ -106,7 +105,7 @@ class EventsQuery(object):
 		if result:
 			return Event.from_json(result.get('event',{}))
 		else:
-			return None	
+			return []	
 
 
 	def get_all(self, *leagues):
@@ -171,5 +170,11 @@ class EventsQuery(object):
 		'''Queries events for one or many teams, by Team ID'''
 		self.query['team'] = ",".join(map(str,teams))
 		return self
+
+	def round(self, x):
+		'''Queries for a specific round '''
+		self.query['round'] = x
+		return self	
+
 
 

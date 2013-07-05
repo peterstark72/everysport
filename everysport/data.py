@@ -7,14 +7,17 @@ The Everysport domain data objects
 '''
 
 
-
-#Used to parse RFC822 datetime string
 from dateutil.parser import parse
 
 
+
 class DataObject(object):
+
+	#The base DataObject has no properties 
 	_properties = []
+	
 	def __init__(self, *args):
+		'''Normal initialization from argument list'''
 
 		if len(args) != len (self._properties):
 			raise TypeError('Expected {} arguments'.format(len(self._properties)))
@@ -23,11 +26,15 @@ class DataObject(object):
 		for name, value in zip(self._properties, args):
 			setattr(self, name, value)	
 
+
 	@classmethod	
-	def from_json(cls, data):
+	def from_json(cls, json_obj):
+		'''Unpack JSON object'''
 		obj = cls.__new__(cls)
-		for name, value in data.items():
+		
+		for name, value in json_obj.items():
 			setattr(obj,name,value)
+		
 		return obj
 
 
@@ -40,8 +47,26 @@ class Arena(DataObject):
 	_properties = ['id', 'name']
 
 
+class Team(DataObject):
+	_properties = ['id', 'name', 'link','short_name','abbreviation']
+
+
+
 class Stats(DataObject):
-	_properties = ['gp', 'w', 'l','gf','ga','gd','pts']
+	_properties = ['gp', 'w', 'ow','l','ol','gf','ga','gd','pts']
+
+	@classmethod	
+	def from_json(cls, json_array):
+		'''Creates a data object from JSON array '''
+		
+		obj = cls.__new__(cls)
+		
+		for stat in json_array:
+			setattr(obj,stat['name'],stat['value'])
+		
+		return obj
+
+
 	def __str__(self):
 		return "{:5}{:5}{:5}{:5}{:5}{:5}{:10}".format(
 						self.gp,
@@ -52,17 +77,6 @@ class Stats(DataObject):
 						self.gd,
 						self.pts)
 
-	@classmethod	
-	def from_json(cls, data):
-		obj = cls.__new__(cls)
-		for stat in data:
-			setattr(obj,stat['name'],stat['value'])
-		return obj
-
-
-class Team(DataObject):
-	_properties = ['id', 'name', 'link','short_name']
-
 
 class Label(DataObject):
 	_properties = ['name', 'type']
@@ -70,7 +84,7 @@ class Label(DataObject):
 		return "{} ({})".format(unicode(self.name), self.type)
 
 
-class Labels(list):
+class LabelsList(list):
 	def __init__(self, data):
 		for d in data:
 			self.append(Label(d.get('name'), d.get('type')))
@@ -78,33 +92,35 @@ class Labels(list):
 
 class Standing(DataObject):
 	_properties = ['team', 'stats']
+
+	@classmethod
+	def from_json(cls, json_obj):
+		return cls(
+			Team.from_json(json_obj.get('team', {})),
+			Stats.from_json(json_obj.get('stats', []))
+			)
+
 	def __str__(self):
 		return unicode(self.team.name.rjust(20) + str(self.stats).rjust(40)).encode('utf-8')
 
-	@classmethod
-	def from_json(cls, data):
-		return cls(
-			Team.from_json(data.get('team', {})),
-			Stats.from_json(data.get('stats', []))
-			)
 
 
-class Standings(list):
+class StandingsList(list):
 	def __init__(self, data):
 		for s in data:
 			self.append(Standing.from_json(s))
 
 
-class Group(DataObject):
+class StandingGroup(DataObject):
 	_properties = ['labels', 'standings']
 
 
-class Groups(list):
+class StandingGroupList(list):
 	def __init__(self, data):
 		for group in data.get('groups',[]):
-			self.append(Group(
-				Labels(group.get('labels',[])),
-				Standings(group.get('standings', []))
+			self.append(StandingGroup(
+				LabelsList(group.get('labels',[])),
+				StandingsList(group.get('standings', []))
 				)
 			)
 
@@ -112,86 +128,67 @@ class Groups(list):
 class League(DataObject):
 	_properties = ['id', 'name', 'sport', 'team_class']
 
+	@classmethod
+	def from_json(cls, json_obj):
+		return cls(json_obj.get('id', None),
+					json_obj.get('name', None),
+					Sport.from_json(json_obj.get('sport', {})),
+					json_obj.get('teamClass',None))
+
+
+class Facts(DataObject):
+	_properties = ['arena','spectators','referees','shots']
 
 	@classmethod
-	def from_json(cls, data):
-		if 'sport' in data: 
-			sport = Sport.from_json(data['sport'])
-		else: 
-			sport = None
-
-		return cls(data.get('id', None),
-					data.get('name', None),
-					sport,
-					data.get('teamClass',None))
+	def from_json(cls, json_obj):
+		return cls(
+			Arena.from_json(json_obj.get('arena',{})),
+			json_obj.get('spectators',None),
+			json_obj.get('referees', []),
+			json_obj.get('shots', None)
+			)
 
 
 
 class Event(DataObject):
-	_properties = ['id', 'start_date', 'round', 'status', 'home_team','visiting_team', 'home_team_score','visiting_team_score','league','arena','spectators','referees']
+	_properties = ['id', 'start_date', 'round', 'status', 'home_team','visiting_team', 'home_team_score','visiting_team_score','finished_time_status','league','facts']
 
 	STATUS_FINISHED = "FINISHED"
 	STATUS_UPCOMING = "UPCOMING"
 	STATUS_PENDING = "PENDING"
-
-	def __str__(self):
-
-		if self.is_finished():
-			return unicode(self.start_date.strftime("%d/%m %H:%M").ljust(15) + self.home_team.name.ljust(20) + str(self.home_team_score).ljust(5) + " " +self.visiting_team.name.ljust(20) + str(self.visiting_team_score).ljust(5)).encode('utf-8')
-		else:
-			return unicode(self.start_date.strftime("%d/%m %H:%M").ljust(15) + self.home_team.name.ljust(20)  +self.visiting_team.name.ljust(20)).encode('utf-8')
-
-
 
 	def is_finished(self):
 		return self.status == Event.STATUS_FINISHED
 
 
 	@classmethod	
-	def from_json(cls, data):
-
-		if 'homeTeam' in data:			
-			home_team = Team.from_json(data['homeTeam'])
-		else:
-			home_team = None
-
-		if 'visitingTeam' in data:	
-			visiting_team = Team.from_json(data['visitingTeam'])
-		else:
-			visiting_team = None
-		
-		if 'league' in data:
-			league = League.from_json(data['league'])	
-		else:
-			league = None
-
-
-		if 'facts' in data:
-			if 'arena' in data['facts']:
-				arena = Arena.from_json(data['facts']['arena'])
-			else:
-				arena = None
-			spectators = data['facts'].get('spectators', None)
-			referees = data['facts'].get('referees', None)
-		else:
-			arena = None
-			spectators = None
-			referees = None
-
-
-		return cls(data.get('id', None),
-				parse(data.get('startDate',None)),				
-				data.get('round',None),
-				data.get('status',None),
-				home_team,
-				visiting_team,
-				data.get('homeTeamScore',None),
-				data.get('visitingTeamScore',None),
-				league,
-				arena,
-				spectators,
-				referees
+	def from_json(cls, json_obj):
+		return cls(
+				json_obj.get('id', None),
+				parse(json_obj.get('startDate',None)), #Date is RFC822
+				json_obj.get('round',None),
+				json_obj.get('status',None),
+				Team.from_json(json_obj.get('homeTeam',{})),
+				Team.from_json(json_obj.get('visitingTeam',{})),
+				json_obj.get('homeTeamScore',None),
+				json_obj.get('visitingTeamScore',None),
+				json_obj.get('finishedTimeStatus',None),
+				League.from_json(json_obj.get('league',{})),
+				Facts.from_json(json_obj.get('facts', {}))
 			)
+
+
+	def __str__(self):
+		s = ""
+		if self.is_finished():
+			s += self.start_date.strftime("%d/%m %H:%M").ljust(15) + self.home_team.name.ljust(20) + str(self.home_team_score).ljust(5) + " " +self.visiting_team.name.ljust(20) + str(self.visiting_team_score).ljust(5)
+		else:
+			s += self.start_date.strftime("%d/%m %H:%M").ljust(15) + self.home_team.name.ljust(20)  +self.visiting_team.name.ljust(20)
+
+		if len(self.shots) > 0:
+			s += "\n" + self.shots
+
+		return s.encode('utf-8')	
 
 
 
