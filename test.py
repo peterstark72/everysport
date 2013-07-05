@@ -51,7 +51,6 @@ class TestEndpints(unittest.TestCase):
             self.assertEqual(ev.round, 3)  
 
     def test_team(self):
-        for ev in self.api.events().team(LEKSAND).get_all(SHL):
         for ev in self.api.events().teams(LEKSAND).get_all(SHL):
             self.assertTrue(LEKSAND in (ev.home_team.id, ev.visiting_team.id))  
 
