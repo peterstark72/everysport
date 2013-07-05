@@ -14,7 +14,6 @@ import everysport
 
 
 def main():
-
 	parser = argparse.ArgumentParser(description='Gets games and standings from everysport.com')	
 	parser.add_argument('-key', '--apikey', action='store',
                    help='Your Everysport APIKEY', dest='apikey', nargs="?")

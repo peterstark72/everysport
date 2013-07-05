@@ -17,6 +17,8 @@ APIKEY = os.environ['EVERYSPORT_APIKEY']
 
 SWISS_LEAGUE = 58882
 ALLSVENSKAN = 57973
+SHL = 60243
+LEKSAND = 3930
 
 
 class TestEndpints(unittest.TestCase):
@@ -46,8 +48,11 @@ class TestEndpints(unittest.TestCase):
 
     def test_round(self):
         for ev in self.api.events().round(3).get_all(ALLSVENSKAN):    
-            self.assertEqual(ev.round, 3)    
+            self.assertEqual(ev.round, 3)  
 
+    def test_team(self):
+        for ev in self.api.events().team(LEKSAND).get_all(SHL):
+            self.assertTrue(LEKSAND in (ev.home_team.id, ev.visiting_team.id))  
 
     def test_finished(self):
         for ev in self.api.events().finished().get_all(ALLSVENSKAN):
