@@ -4,6 +4,12 @@
 import unittest
 import everysport
 
+
+'''
+Getting the Everysport APIKEY from the system environment. You need to set this with 
+
+    export EVERYSPORT_APIKEY={YOUR KEY}
+'''
 import os
 APIKEY = os.environ['EVERYSPORT_APIKEY']
 

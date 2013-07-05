@@ -4,6 +4,25 @@ Everysport API Python
 A Python wrapper for the [Everysport API](https://github.com/menmo/everysport-api-documentation). 
 
 
+## Installation
+
+
+Using PIP:
+
+```python
+pip install everysport
+```
+
+Or download and unpack the distribution:
+
+```python
+python setup.py install
+```
+
+
+
+## Usage
+
 Create the API client, with your APIKEY from support@everysport.com
 
 ```python
