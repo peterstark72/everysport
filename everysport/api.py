@@ -35,11 +35,17 @@ class Api(object):
 		return StandingsQuery(self)
 
 
-	def get_json(self, endpoint, params=dict()):
-		'''Called by the query object to get a resource from the Api'''
+	def get_json(self, endpoint, query_arguments=None):
+		'''Called by the query object to get a resource from the Api. Returns None if no resource could be loaded'''
+		
+		params = {}	
 		params['apikey'] = self._apikey
 		
+		if query_arguments:
+			params.update(query_arguments)
+
 		encoded_params = urllib.urlencode(params)
+
 		url = BASE_API_URL.format(endpoint) + '?' + encoded_params	
 
 		try:	
@@ -52,11 +58,22 @@ class Api(object):
 		return result
 
 
-
-class StandingsQuery(object):
+class ApiQuery(object):
+	'''Base class for all queries. '''
 	def __init__(self, api):
+		'''Initialized with the API and empty query '''
 		self.api = api
 		self.query = {}
+
+
+
+class StandingsQuery(ApiQuery):
+	'''A Query for a league's standings (tables). In most leagues, just one. But e.g. NHL have many groups. 
+	
+		Arguments:
+			type - one of 'total' (default), 'home' and 'away'
+			round - specifies standings after a specific round, eg. '10'. Default is the last played round.
+	'''		
 
 	def total(self):
 		'''Queries for Total standings '''
@@ -79,7 +96,9 @@ class StandingsQuery(object):
 		return self	
 
 	def get(self, league_id):
-		'''Loads the standings from the API and returns a Standings object'''
+		'''Loads the standings from the API and returns 
+		a StandingGroupList'''
+		
 		endpoint = 'leagues/' + str(league_id) + '/standings'
 		
 		result = self.api.get_json(endpoint, self.query)
@@ -91,10 +110,21 @@ class StandingsQuery(object):
 
 
 
-class EventsQuery(object):
-	def __init__(self, api):
-		self.api = api
-		self.query = {}
+class EventsQuery(ApiQuery):
+	'''A query for one or many events. 
+
+		Arguments:
+		league - list of league IDs, for which to retrieve events.
+		upcoming - gets upcoming games
+		finisged - gets finisged games 
+		fromDate - filters out events after a specific date
+		toDate - filters out events before a specific date
+		round - one or many rounds, for which to retrieve events.
+		team - one or many team IDs, for which to retrieve events.
+		sport - one or many sport IDs, for which to retrieve events.
+
+	'''
+
 
 	def get(self, event_id):
 		'''Get one event from the API. Returns an Event object or None'''
@@ -105,7 +135,7 @@ class EventsQuery(object):
 		if result:
 			return Event.from_json(result.get('event',{}))
 		else:
-			return []	
+			return None	
 
 
 	def get_all(self, *leagues):
@@ -171,9 +201,9 @@ class EventsQuery(object):
 		self.query['team'] = ",".join(map(str,teams))
 		return self
 
-	def round(self, x):
+	def round(self, *x):
 		'''Queries for a specific round '''
-		self.query['round'] = x
+		self.query['round'] = ",".join(map(str,x))
 		return self	
 
 
