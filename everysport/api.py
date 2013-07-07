@@ -11,64 +11,76 @@ A simple library that wraps the Everysport API.
 import datetime
 import urllib
 import urllib2
-import json
 
-from data import Event
-from data import StandingGroupList
+from data import Event, Events, Standings
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
 
 
+class EverysportException(Exception):
+	pass
+
+
 class Api(object):
 	def __init__(self, apikey):
-		self._apikey = apikey
-
+		self.apikey = apikey
 
 	def events(self):
 		'''Returns a Query object for events'''
-		return EventsQuery(self)
+		return EventsQuery(self.apikey)
 
 
 	def standings(self):
 		'''Returns a Query object for standings'''
-		return StandingsQuery(self)
+		return StandingsQuery(self.apikey)
 
 
-	def get_json(self, endpoint, query_arguments=None):
-		'''Called by the query object to get a resource from the Api. Returns None if no resource could be loaded'''
-		
-		params = {}	
-		params['apikey'] = self._apikey
-		
-		if query_arguments:
-			params.update(query_arguments)
 
-		encoded_params = urllib.urlencode(params)
+class UrlBuilder(object):
+	'''Builder for URLs for various endpoints'''
+	def __init__(self):
+		self.url = ""
 
-		url = BASE_API_URL.format(endpoint) + '?' + encoded_params	
+	def standings(self, league_id):
+		endpoint = 'leagues/' + str(league_id) + '/standings'
+		self.url = BASE_API_URL.format(endpoint)
+		return self
 
-		try:	
-			response = urllib2.urlopen(url)
-			result = json.load(response)	
-		except:
-			return None
-			
+	def events(self):
+		endpoint = 'events'
+		self.url = BASE_API_URL.format(endpoint)
+		return self
 
-		return result
+	def event(self, event_id):
+		endpoint = 'events/' + str(event_id) 
+		self.url = BASE_API_URL.format(endpoint)
+		return self
+
+	def with_params(self, params_dict):
+		encoded_params = urllib.urlencode(params_dict)
+		self.url += "?" + encoded_params 
+		return self	
+
+	def get(self):
+		'''Send a GET request to the URL'''
+		return urllib2.urlopen(self.url)
+ 
 
 
 class ApiQuery(object):
 	'''Base class for all queries. '''
-	def __init__(self, api):
+	def __init__(self, apikey):
 		'''Initialized with the API and empty query '''
-		self.api = api
-		self.query = {}
-
+		self.params = {}
+		self.params['apikey'] = apikey
 
 
 class StandingsQuery(ApiQuery):
-	'''A Query for a league's standings (tables). In most leagues, just one. But e.g. NHL have many groups. 
+	'''A Query for a league's standings (tables). In most leagues, just one. But e.g. NHL have many groups.
+
+		It returns a Standings object which contains a list of StandingGroups. Each group contains a list of labels and the actual standings for the group. The standings contains the team and a list of team stats. 
+
 	
 		Arguments:
 			type - one of 'total' (default), 'home' and 'away'
@@ -77,36 +89,40 @@ class StandingsQuery(ApiQuery):
 
 	def total(self):
 		'''Queries for Total standings '''
-		self.query['type'] = 'total'
+		self.params['type'] = 'total'
 		return self
 
 	def home(self):
 		'''Queries for Home standings '''
-		self.query['type'] = 'home'
+		self.params['type'] = 'home'
 		return self		
 
 	def away(self):
 		'''Queries for Away standings '''
-		self.query['type'] = 'away'
+		self.params['type'] = 'away'
 		return self		
 
 	def round(self, x):
 		'''Queries for a specific round '''
-		self.query['round'] = x
+		self.params['round'] = x
 		return self	
 
-	def get(self, league_id):
-		'''Loads the standings from the API and returns 
-		a StandingGroupList'''
-		
-		endpoint = 'leagues/' + str(league_id) + '/standings'
-		
-		result = self.api.get_json(endpoint, self.query)
+	def league(self, league_id):
+		self.league_id = league_id
+		return self
 
-		if result:
-			return StandingGroupList(result)
-		else: 
-			return []
+	def load(self):
+		'''Loads all groups of standings for this league.'''
+		
+		url = UrlBuilder().standings(self.league_id).with_params(self.params)
+		try: 
+			response = url.get()
+			result = Standings.from_json(response)
+		except:
+			raise EverysportException("Could not load {}".format(url))
+
+		return result
+
 
 
 
@@ -125,86 +141,91 @@ class EventsQuery(ApiQuery):
 
 	'''
 
-
-	def get(self, event_id):
-		'''Get one event from the API. Returns an Event object or None'''
-		endpoint = 'events/' + str(event_id)
-		
-		result = self.api.get_json(endpoint)
-		
-		if result:
-			return Event.from_json(result.get('event',{}))
-		else:
-			return None	
-
-
-	def get_all(self, *leagues):
-		'''Generator that loads all events from the API.'''
-
-		if len(leagues)>0:
-			self.query['league'] = ",".join(map(str, leagues))
-
-		done = False
-		while not done:
-			result = self.api.get_json('events', self.query)
-			if not result:
-				raise StopIteration
-			
-			count = result['metadata']['count']
-			offset = result['metadata']['offset']
-			limit = result['metadata']['limit']
-
-			done = count == 0 
-			if not done:
-				for ev in result.get('events',[]):
-					yield Event.from_json(ev)
-				self.query['offset'] = offset + count
-			done = count < limit
-	
-
 	def fromdate(self, d):
 		'''Queries events from this date'''
-		self.query['fromDate'] = d
+		self.params['fromDate'] = d
 		return self
 
 	
 	def todate(self, d):
 		'''Queries events to this date'''
-		self.query['toDate'] = d
+		self.params['toDate'] = d
 		return self
 
 
 	def today(self):
 		'''Queries today's events'''
 		today = datetime.date.today()
-		self.query['toDate'] = self.query['fromDate'] = today.strftime('%Y-%m-%d')
+		self.params['toDate'] = self.params['fromDate'] = today.strftime('%Y-%m-%d')
 		return self 
 
 
 	def upcoming(self):
 		'''Queries for all upcoming events'''
-		self.query['status'] = "UPCOMING"
+		self.params['status'] = "UPCOMING"
 		return self
 
 	def finished(self):
 		'''Queries for all finished events'''
-		self.query['status'] = "FINISHED"
+		self.params['status'] = "FINISHED"
 		return self
 
 	def sport(self, *sports):
 		'''Queries events for one or many sports, by Sport ID'''
-		self.query['sport'] = ",".join(map(str, sports))
+		self.params['sport'] = ",".join(map(str, sports))
 		return self
 
 	def teams(self, *teams):
 		'''Queries events for one or many teams, by Team ID'''
-		self.query['team'] = ",".join(map(str,teams))
+		self.params['team'] = ",".join(map(str,teams))
 		return self
 
 	def round(self, *x):
 		'''Queries for a specific round '''
-		self.query['round'] = ",".join(map(str,x))
+		self.params['round'] = ",".join(map(str,x))
 		return self	
+
+	def leagues(self, *leagues):
+		'''Queries for one or many leagues'''
+		self.params['league'] = ",".join(map(str, leagues))
+		return self		
+
+
+	def load(self, event_id):
+		'''Get one event from the API. Returns an Event object or raises EverysportExceptions'''
+		
+		url = UrlBuilder().event(event_id).with_params(self.params)
+		try:
+			response  = url.get()
+		except:
+			raise EverysportException('Could not load {}'.format(url))
+
+		return Event.from_json(response)
+
+
+	def __iter__(self):
+		'''Generator that loads all events from the API.'''
+
+		done = False
+		while not done:
+			
+			url = UrlBuilder().events().with_params(self.params)
+			try:
+				response = url.get()
+				result = Events.from_json(response)
+			except:
+				raise StopIteration
+			
+			done = result.count == 0 
+			if not done:
+				for ev in result:
+					yield ev
+				self.params['offset'] = result.offset + result.count
+			done = result.count < result.limit
+
+
+
+
 
 
 

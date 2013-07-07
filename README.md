@@ -33,32 +33,28 @@ Create a few queries:
 
 ```python
 
-events_today = api.events().today()
-
-standings_total = api.standings().total()
-
-upcoming_events = api.events().upcoming()
-```
-
-Get the data by specifying League ID from everysport.com (Allsvenskan is 57973):
-```python
-
 ALLSVENSKAN = 57973
 
+allsvenskan_today = api.events().today().leagues(ALLSVENSKAN)
+
+allsvenskan_standings = api.standings().total().league(ALLSVENSKAN)
+
+allsvenskan_upcoming = api.events().upcoming().leagues(ALLSVENSKAN)
+```
+
+Get data and print:
+```python
+
 #Today's games
-for event in events_today.get_all(ALLSVENSKAN):
-		print event
+everysport.writers.write_events(allsvenskan_today)
 
 
 #Upcoming's games		
-for event in upcoming_events.get_all(ALLSVENSKAN):
-		print event	
+everysport.writers.write_events(allsvenskan_upcoming)
 
 
-#Standnings, 
-for group in standings_total.get(ALLSVENSKAN):
-	for s in group.standings:
-		print s		
+#Standnings
+everysport.writers.write_table(allsvenskan_standings)
 ```
 
 

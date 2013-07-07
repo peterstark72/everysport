@@ -5,82 +5,56 @@
 A CLI for Everysport.com. 
 Lets you print games and standings
 
+
 '''
-import os
 import argparse
-import logging
 
 import everysport
+
+
+#Try to get APIKEY from OS env
+import os
+try: 
+	APIKEY = os.environ['EVERYSPORT_APIKEY']
+except KeyError:
+	APIKEY = ""
 
 
 def main():
 	parser = argparse.ArgumentParser(description='Gets games and standings from everysport.com')	
 	parser.add_argument('-key', '--apikey', action='store',
-                   help='Your Everysport APIKEY', dest='apikey', nargs="?")
+                   help='Your Everysport APIKEY', dest='apikey', nargs="?", default=APIKEY)
 	parser.add_argument('-s', '--standings', dest='standings', action='store_true')
 	parser.add_argument('-u', '--upcoming', dest='upcoming', action='store_true')
 	parser.add_argument('-r', '--results', dest='results', action='store_true')	
 	parser.add_argument('-t', '--today', dest='today', action='store_true')
-	parser.add_argument('-l', '--leagues', dest='leagues', nargs='+')
-	parser.add_argument('-e', '--events', dest='events', nargs='+')
+	parser.add_argument( dest='leagues', nargs='+')
+	
+
 	args = parser.parse_args()
 
 
-	#Get API KEY
-	apikey = args.apikey
-	try: 
-		apikey = os.environ['EVERYSPORT_APIKEY']
-	except KeyError:
-		logging.info('No EVERYSPORT_APIKEY environment variable.')
-
-
 	#Create an API client
-	api = everysport.Api(apikey)
+	api = everysport.Api(args.apikey)
+	events = api.events()
 
-	
-	#Get list of leagues, if provided
-	if args.leagues:
-		leagues = args.leagues
-	else:
-		leagues = []	
+	if args.today:
+		games = events.today().leagues(*args.leagues)
+		everysport.writers.write_events(games)
 
-	for league in leagues:
-		#Games today
-		if args.today:
-			for d in api.events().today().get_all(league):
-				print d	
+	if args.results:
+		games = events.finished().leagues(*args.leagues)
+		everysport.writers.write_events(games)				
 
-		#Total standings
-		if args.standings:
-			for group in api.standings().total().get(league):
-				for label in group.labels:
-					print label.name,
-				print
-				for s in group.standings:
-					print s
-
-		#Results
-		if args.results:
-			for d in api.events().finished().get_all(league):
-				print d	
+	if args.upcoming:
+		games = events.upcoming().leagues(*args.leagues)
+		everysport.writers.write_events(games)				
 
 
-		#Upcoming games
-		if args.upcoming:
-			for d in api.events().upcoming().get_all(league):
-				print d	
-
-	
-	#Get events
-	if args.events:
-		events = args.events 	
-	else:
-		events = []	
-				
-	#Traverse events and print					
-	for event in events:
-		ev = api.events().get(event)
-		print ev		
+	#Total standings
+	if args.standings:
+		stdns = api.standings().total().league(args.leagues[0]).load()
+		everysport.writers.write_tables(stdns)
 
 	
 
