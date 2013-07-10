@@ -20,42 +20,19 @@ python setup.py install
 ```
 
 
+## Basic Usage
 
-## Usage
-
-Create the API client, with your APIKEY from support@everysport.com
-
-```python
-api = everysport.Api(EVERYSPORT_APIKEY)
-```
-
-Create a few queries:
+Get EVERYSPORT_APIKEY from support@everysport.com.
 
 ```python
+    api = everysport.Api(EVERYSPORT_APIKEY)
+    
+    for event in api.events().upcoming().leagues(everysport.ALLSVENSKAN):
+        print event
 
-ALLSVENSKAN = 57973
 
-allsvenskan_today = api.events().today().leagues(ALLSVENSKAN)
-
-allsvenskan_standings = api.standings().total().league(ALLSVENSKAN)
-
-allsvenskan_upcoming = api.events().upcoming().leagues(ALLSVENSKAN)
+    for standing in api.standings(everysport.ALLSVENSKAN).total():
+        print standing
 ```
-
-Get data and print:
-```python
-
-#Today's games
-everysport.writers.write_events(allsvenskan_today)
-
-
-#Upcoming's games		
-everysport.writers.write_events(allsvenskan_upcoming)
-
-
-#Standnings
-everysport.writers.write_table(allsvenskan_standings)
-```
-
 
 

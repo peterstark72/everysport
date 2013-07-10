@@ -7,10 +7,8 @@ The Everysport domain data objects
 '''
 
 import json
-from dateutil.parser import parse
 from collections import namedtuple
-
-
+import datetime
 
 class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
 	__slots__ = () #prevent creation of instance dict
@@ -91,16 +89,23 @@ class Facts(namedtuple('Facts', "arena,spectators,referees,shots")):
 
 
 
-class Event(namedtuple('Event', "id, start_date, round, status, home_team, visiting_team, home_team_score, visiting_team_score, finished_time_status, league,facts")):
+class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_team, visiting_team, home_team_score, visiting_team_score, finished_time_status, league,facts")):
 	__slots__ = ()
 
 	STATUS_FINISHED = "FINISHED"
 
 	@classmethod	
 	def from_dict(cls, data):
+		try:
+			d = data['startDate'][0:16]
+			start_date = datetime.datetime.strptime(d, "%Y-%m-%dT%H:%M")
+		except:
+			start_date = None
+
 		return cls(
 				data.get('id', None),
-				parse(data.get('startDate',None)), #Date is RFC822
+				start_date,
+				"CEST",
 				data.get('round',None),
 				data.get('status',None),
 				Team.from_dict(data.get('homeTeam',{})),
@@ -174,9 +179,7 @@ Resources
 '''
 class Events(list):
 	@classmethod	
-	def from_json(cls, json_doc):
-
-		data = json.load(json_doc)			
+	def from_dict(cls, data):
 
 		obj = cls.__new__(cls)
 
@@ -195,9 +198,7 @@ class Events(list):
 
 class Standings(list):
 	@classmethod
-	def from_json(cls, json_doc):
-		
-		data = json.load(json_doc)
+	def from_dict(cls, data):
 
 		obj = cls.__new__(cls)
 
@@ -206,5 +207,4 @@ class Standings(list):
 		
 		obj.credit = Credit.from_dict(data.get('credit', {}))
 
-		return obj
-
+		return obj	
