@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from api import Api, EverysportException
-from stats import EventStats
 
 '''
 	ID for everysport.com sports, as defined by 
