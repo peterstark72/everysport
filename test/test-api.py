@@ -49,7 +49,7 @@ class TestApi(unittest.TestCase):
             counter += 1
         self.assertTrue(counter == 720) #games in NHL  
 
-
+    @unittest.skip('Takes time')
     def test_events_allsvenskan_superettan(self):
         counter = 0
         for ev in self.api.events().leagues(
@@ -84,8 +84,8 @@ class TestApi(unittest.TestCase):
 
 
     def test_team(self):
-        for ev in self.api.events().teams(everysport.TEAM_LSD).leagues(everysport.SHL):
-            self.assertTrue(everysport.TEAM_LSD in (ev.home_team.id, ev.visiting_team.id))  
+        for ev in self.api.events().teams(everysport.LSD.id).leagues(everysport.SHL):
+            self.assertTrue(everysport.LSD.id in (ev.home_team.id, ev.visiting_team.id))  
 
     
 
@@ -126,11 +126,17 @@ class TestApi(unittest.TestCase):
             self.assertTrue(len(standings) > 0)  
 
     
+    def test_teamslist(self):
+        teams = self.api.teams(everysport.ALLSVENSKAN)
+        self.assertTrue(len(teams) > 0)
+
+
+
 
 
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='test-api.log', 
+    logging.basicConfig(filename='api.log', 
                         level=logging.DEBUG, 
                         filemode="w") 
     unittest.main()

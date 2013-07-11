@@ -64,7 +64,7 @@ class TestStats(unittest.TestCase):
 
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='test-stats.log',
+    logging.basicConfig(filename='stats.log',
                             level=logging.DEBUG, 
                             filemode="w")
     unittest.main()

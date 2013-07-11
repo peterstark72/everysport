@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='everysport',
-      version='1.0.3',
+      version='1.0.4',
       packages=['everysport'],
       description='A Python wrapper for the Everysport API',
       author='Peter Stark',
