@@ -2,6 +2,25 @@
 # -*- coding: utf-8 -*-
 
 from api import Api, EverysportException
+<<<<<<< HEAD
+=======
+import stats
+
+
+
+
+'''Teams from everysport.com
+'''
+
+from data import Team 
+
+MFF = Team(9375,u"Malmö FF", "", "")
+HBG = Team(9373,u"Helingsborgs IF", "", "")
+LSD = Team(1175,u"Leksand", "", "")
+CHI = Team(28075,u"Chicago Blackhawks", "", "")
+
+
+>>>>>>> stats
 
 '''
 	ID for everysport.com sports, as defined by 
@@ -38,7 +57,6 @@ VOLLEYBALL = 11
 #Football
 ALLSVENSKAN = 57973
 SUPERETTAN = 57974
-
 
 #Hockey
 SWISS_LEAGUE = 58882
