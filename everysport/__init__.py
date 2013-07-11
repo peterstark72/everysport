@@ -65,11 +65,3 @@ NHL = 58878
 
 
 
-TEAM_HBG = 9373 #Helsingborgs
-TEAM_MFF = 9375 #Malmö FF
-
-TEAM_LSD = 1175 #Leksand
-
-TEAM_CHI = 28075 #Chicago Blackhawks
-
-
