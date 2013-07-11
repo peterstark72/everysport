@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from api import Api, EverysportException
-<<<<<<< HEAD
-=======
 import stats
-
 
 
 
@@ -20,7 +17,6 @@ LSD = Team(1175,u"Leksand", "", "")
 CHI = Team(28075,u"Chicago Blackhawks", "", "")
 
 
->>>>>>> stats
 
 '''
 	ID for everysport.com sports, as defined by 
