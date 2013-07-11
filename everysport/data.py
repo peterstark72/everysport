@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
 
@@ -208,3 +208,10 @@ class Standings(list):
 		obj.credit = Credit.from_dict(data.get('credit', {}))
 
 		return obj	
+
+
+
+
+
+
+

@@ -48,6 +48,16 @@ class Api(object):
         return StandingsQuery(self, league_id)
 
 
+    def teams(self, league_id):
+        team_list = []
+        for group in StandingsQuery(self, league_id):
+            for teamstats in group.standings:
+                team_list.append(teamstats.team)
+
+        logging.debug("Teams list {}".format(team_list))
+        return team_list        
+        
+
     def get_event(self, event_id):
         '''Returns an Event for a given id  
 
