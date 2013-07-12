@@ -1,11 +1,10 @@
-Everysport API Python 
-=====================
+Everysport Python Module 
+=========================
 
-A Python wrapper for the [Everysport API](https://github.com/menmo/everysport-api-documentation). 
+A Python module for [Everysport](https://github.com/menmo/everysport-api-documentation) to access events, standings and results from everysport.com. 
 
 
 ## Installation
-
 
 Using PIP:
 
@@ -20,31 +19,28 @@ python setup.py install
 ```
 
 
-## Basic Usage
+## Basic usage
 
-Get EVERYSPORT_APIKEY from support@everysport.com.
+You need an EVERYSPORT_APIKEY from support@everysport.com, then you create an Api instance and start requesting events and standings.
 
 ```python
     api = everysport.Api(EVERYSPORT_APIKEY)
 
 
-    #Upcoming games in Allsvenskan (swedish football)
-    games = api.events().upcoming().leagues(everysport.ALLSVENSKAN)
-    for game in games:
+    allsvenskan = api.events().upcoming().leagues(everysport.ALLSVENSKAN)    
+    for game in events_allsvenskan:
         print game
 
 
-    #Current Allsvenskan Table (standings)
-    tables = api.standings(everysport.ALLSVENSKAN).total()        
-    for standing in tables:
+    standings = api.standings(everysport.ALLSVENSKAN).total()        
+    for standing in standings:
         print standing
 
-
-    #Results by team in Allsvenskan
-    teams = api.teams(everysport.ALLSVENSKAN)
-    games = api.events().upcoming().leagues(everysport.ALLSVENSKAN)
-    for res in everysport.stats.results(api, games, *teams):
-        print res
 ```
+
+
+
+
+
 
 

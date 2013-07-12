@@ -15,9 +15,13 @@ def main():
 
     games = api.events(everysport.ALLSVENSKAN).upcoming()
 
-    for game in games.getall():
+    for game in games:
         print game
 
+    print "====="        
+
+    for game in games.getall():
+        print game        
 
 
 if __name__ == '__main__':
