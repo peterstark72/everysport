@@ -7,7 +7,6 @@ import logging
 import os
 
 
-
 #Getting the Everysport APIKEY from the system environment. 
 APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
@@ -18,36 +17,30 @@ class TestResults(unittest.TestCase):
         self.api = everysport.Api(APIKEY)  
 
 
-    def test_get_pos_change(self):
-        
-        standings = self.api.standings(everysport.ALLSVENSKAN)
+    def test_get_pos_round(self):        
 
-        pos1 = everysport.stats.get_position_for_round(
-                            standings, everysport.HBG.id, 2)
-        pos2 = everysport.stats.get_position_for_round(
-                            standings, everysport.HBG.id, 3)
-        
-        change = everysport.stats.get_position_change(
-                            standings, everysport.HBG.id, 2, 3)
+        standings = self.api.standings(everysport.ALLSVENSKAN).round(15).getall()
 
-        self.assertEqual(change, pos1 - pos2)
+        pos = standings.get_teamposition(everysport.HBG)
+
+        self.assertEqual(pos, 3 )
+
 
 
     def test_results_allsvenskan(self):
-        events = self.api.events().leagues(everysport.ALLSVENSKAN)
-        teams = self.api.teams(everysport.ALLSVENSKAN)
-
-        sl = everysport.stats.results(self.api, events, *teams)
-
-        self.assertTrue(len(sl) > 0)
+        results = self.api.get_results(everysport.ALLSVENSKAN)
+        self.assertTrue(len(results) > 0)
 
 
-    def test_results_mff(self):
-        events = self.api.events().leagues(everysport.ALLSVENSKAN)
+    def test_results_nhl(self):
+        results = self.api.get_results(everysport.NHL)
+        self.assertTrue(len(results) > 0)
 
-        sl = everysport.stats.results(self.api, events, everysport.MFF)
 
-        self.assertTrue(len(sl) > 0)
+    def test_json(self):
+        results = self.api.get_results(everysport.ALLSVENSKAN)
+        self.assertTrue(len(results._asjson()) > 0 )
+
 
 
 

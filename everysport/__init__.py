@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from api import Api, EverysportException
-import stats
-
+from api import Api
+from data import EverysportException
 
 
 '''Teams from everysport.com

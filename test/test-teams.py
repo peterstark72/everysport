@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -20,19 +20,14 @@ class TestApi(unittest.TestCase):
     def setUp(self):        
         self.api = everysport.Api(APIKEY)
 
-
-    def test_api(self):
-        self.assertTrue(self.api)
-
-    def test_unauthorized(self):
-        foo = everysport.Api("foo")
-        with self.assertRaises(everysport.EverysportException):
-            foo.get_event(2129667)
-
+    
+    def test_teamslist(self):
+        teams = self.api.get_teams(everysport.ALLSVENSKAN)
+        self.assertTrue(len(teams) > 0)
 
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='api.log', 
+    logging.basicConfig(filename='teams.log', 
                         level=logging.DEBUG, 
                         filemode="w") 
     unittest.main()

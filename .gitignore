@@ -3,6 +3,10 @@
 # C extensions
 *.so
 
+#Appengine
+app.yaml
+main.py
+index.html
 
 # Packages
 *.egg
