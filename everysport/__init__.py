@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from api import Api
-from data import EverysportException
-
+from api import Api, EverysportException
+import results
 
 '''Teams from everysport.com
 '''
 
-from data import Team 
+from teams import Team 
 
 MFF = Team(9375,u"Malmö FF", "", "")
 HBG = Team(9373,u"Helingsborgs IF", "", "")

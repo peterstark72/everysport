@@ -6,7 +6,7 @@
 #Appengine
 app.yaml
 main.py
-index.html
+
 
 # Packages
 *.egg

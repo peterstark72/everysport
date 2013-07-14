@@ -22,23 +22,35 @@ class TestStandings(unittest.TestCase):
 
 
     def test_standings(self):
-        for standings in self.api.standings(everysport.ALLSVENSKAN).getall():
+        for standings in self.api.standings(everysport.ALLSVENSKAN).fetchall():
             self.assertTrue(len(standings.labels) >= 0)    
             self.assertTrue(len(standings) > 0)   
 
 
     def test_standings2(self):
 
-        standings = self.api.standings(everysport.ALLSVENSKAN).getall()
-        self.assertTrue(len(standings[0].labels) >= 0)
-        self.assertTrue(len(standings[0].standings) >= 0)    
+        standings = self.api.standings(everysport.ALLSVENSKAN).fetchall()
+        self.assertTrue(len(standings.group().labels) >= 0)
+        self.assertTrue(len(standings.group().standings) >= 0)    
 
 
 
     def test_standings_swiss(self):
-        for standings in self.api.standings(everysport.SWISS_LEAGUE).getall():
+        for standings in self.api.standings(everysport.SWISS_LEAGUE).fetchall():
             self.assertTrue(len(standings.labels) >= 0)    
             self.assertTrue(len(standings) > 0)  
+
+
+    def test_get_teamposition(self):
+        standings = self.api.standings(everysport.ALLSVENSKAN).round(15).fetchall()
+        pos = standings.get_teamposition(everysport.HBG.id)
+        self.assertEqual(pos, 3)
+
+
+    def test_get_teamposition2(self):
+        standings = self.api.standings(everysport.ALLSVENSKAN).round(15).fetchall()
+        pos = standings.get_teamposition(666666) #Invalid
+        self.assertTrue(pos == None)
 
     
 

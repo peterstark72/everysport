@@ -7,21 +7,25 @@ A simple library that wraps the Everysport API.
 
 
 import datetime
-import urllib
 import logging
 
-from data import Event, EventsList, StandingsGroupsList, LeagueResults
+
+from events import EventsList as EventsList
+from events import Event as Event
+from standings import StandingsGroupsList as StandingsGroupsList
+from results import get_results_for_leagues as get_results_for_leagues
 
 
-BASE_API_URL = "http://api.everysport.com/v1/{}"
+import url_builder
 
 
+class EverysportException(Exception):
+    pass
 
 
 class Api(object):
     '''Everysport API client'''
 
-    cache = {}
 
     def __init__(self, apikey):     
         '''Create an API client
@@ -51,15 +55,16 @@ class Api(object):
         league_id - from everysport.com
 
         '''
-        
         return StandingsQuery(self, league_id)
 
 
+    def get_results(self, *league_ids):
+        '''Return results for given leagues
 
-    def get_results(self, league_id):
-        '''Returns results for each team in the league'''
-        return LeagueResults(self, league_id)
-
+        Arguments:
+        league_id - from everysport.com
+        '''
+        return get_results_for_leagues(self, *league_ids)
         
 
     def get_event(self, event_id):
@@ -69,62 +74,19 @@ class Api(object):
         event_id - from everysport.com
         
         '''
-        
-        params = {'apikey': self.apikey}
 
-        url = UrlBuilder().event(event_id).with_params(params).build()
+        url = url_builder.get_event_url(event_id, apikey=self.apikey)
 
-        return Event.from_resource(url)    
+        try:
+            event = Event.from_resource(url)    
+        except Exception as e:
+            m = u"Could not load event {} : {}".format(event_id, e.message)
+            logging.warning(m)
+            raise EverysportException(m)
+
+        return event
             
  
-
-class UrlBuilder(object):
-    '''Builder for URLs for various endpoints'''
-    def __init__(self):
-        self.url = ""
-
-    def standings(self, league_id):
-        '''Builds URL for standings resource
-
-        Arguments:
-        league_id - from everysport.com
-
-        '''
-        endpoint = 'leagues/' + str(league_id) + '/standings'
-        self.url = BASE_API_URL.format(endpoint)
-        return self
-
-    def events(self):
-        '''Builds URL for standings resource'''
-        endpoint = 'events'
-        self.url = BASE_API_URL.format(endpoint)
-        return self
-
-    def event(self, event_id):
-        '''Builds URL for event resource
-
-        Arguments:
-        event_id -- from everysport.com
-
-        '''
-        endpoint = 'events/' + str(event_id) 
-        self.url = BASE_API_URL.format(endpoint)
-        return self
-
-    def with_params(self, params):
-        '''Adds parameters to the URL
-
-        Arguments:
-        params - a dictionary with parameters to add to the URL
-
-        '''
-        encoded_params = urllib.urlencode(params)
-        self.url += "?" + encoded_params 
-        return self 
-
-    def build(self):
-        '''Returns the URL that has been built'''
-        return self.url
 
 
 
@@ -166,10 +128,10 @@ class StandingsQuery(ApiQuery):
         return self 
 
 
-    def getall(self):   
+    def fetchall(self):   
         '''Returns a StandingsGroupsList of all standings groups'''
         
-        url = UrlBuilder().standings(self.league_id).with_params(self.params).build()
+        url = url_builder.get_standings_url(self.league_id, **self.params)
 
         return StandingsGroupsList.from_resource(url)
 
@@ -184,7 +146,7 @@ class EventsQuery(ApiQuery):
 
     def __init__(self, api_client, *league_ids):
         super(EventsQuery, self).__init__(api_client)
-        self.params['league'] = ",".join(map(str, league_ids))
+        self.league_ids = league_ids
 
 
     def fromdate(self, d):
@@ -232,7 +194,7 @@ class EventsQuery(ApiQuery):
         return self 
 
 
-    def getall(self):
+    def fetchall(self):
         '''Returns a list of ALL events. This can be large, 500+ items for some leagues'''
 
         events = []
@@ -247,7 +209,7 @@ class EventsQuery(ApiQuery):
         done = False
         while not done:
             
-            url = UrlBuilder().events().with_params(self.params).build()
+            url = url_builder.get_events_url(*self.league_ids, **self.params)
             try:
                 result = EventsList.from_resource(url)
             except:

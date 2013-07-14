@@ -13,18 +13,14 @@ def main():
 
     api = everysport.Api(EVERYSPORT_APIKEY)
 
-    standings = api.standings(everysport.ALLSVENSKAN).total()        
-    for standings_group in standings.getall():
-        print standings_group
+    standings = api.standings(everysport.ALLSVENSKAN).total().fetchall()        
+    allsvenskan = standings.group()        
 
-            
+    for teamstats in allsvenskan.standings:
+        print teamstats.team.name.encode('utf-8')
+        print teamstats.stats.__dict__
 
 
-    #List of teams in Allsvenskan and Superettan
-    teams = api.get_teams(everysport.ALLSVENSKAN, everysport.SUPERETTAN)
-
-    for team in teams:
-        print team.name.encode('utf-8')
 
 
 if __name__ == '__main__':

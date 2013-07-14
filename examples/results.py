@@ -2,21 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import os
+
 import everysport
+
+import itertools
 
 
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
 
-def main():
+api = everysport.Api(EVERYSPORT_APIKEY)
 
-    api = everysport.Api(EVERYSPORT_APIKEY)
+results = api.get_results(everysport.ALLSVENSKAN)
 
-    results = api.get_results(everysport.ALLSVENSKAN)
-
-    print results._asjson()
-
+for result in itertools.ifilter(lambda x:x.home, results):
+    print u"{} - {}  {}-{}".format(result.team.name, result.against.name, result.gf, result.ga).encode('utf-8')
 
 
-if __name__ == '__main__':
-    main()

@@ -5,24 +5,16 @@ import os
 import everysport
 
 
-
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
 
-def main():
-
-    api = everysport.Api(EVERYSPORT_APIKEY)
-
-    games = api.events(everysport.ALLSVENSKAN).upcoming()
-
-    for game in games:
-        print game
-
-    print "====="        
-
-    for game in games.getall():
-        print game        
+api = everysport.Api(EVERYSPORT_APIKEY)
 
 
-if __name__ == '__main__':
-    main()
+for event in api.events(everysport.ALLSVENSKAN):
+    print event
+
+
+
+
+

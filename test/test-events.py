@@ -26,28 +26,18 @@ class TestApi(unittest.TestCase):
         ev = self.api.get_event(2129667)
         self.assertEqual(ev.id, 2129667)
 
-
+    
     def test_events_allsvenskan(self):
-        counter = 0
-        for ev in self.api.events(everysport.ALLSVENSKAN):
-            counter += 1
-        self.assertTrue(counter == 240) #games in Allsvenskan  
-
-
-    def test_events_allsvenskan2(self):
-        events = self.api.events(everysport.ALLSVENSKAN).getall()
-
+        events = self.api.events(everysport.ALLSVENSKAN).fetchall()
         self.assertTrue(len(events) == 240) #games in Allsvenskan  
 
 
-    @unittest.skip('Takes time')
+    @unittest.skip("Too long")    
     def test_events_nhl(self):
-        counter = 0
-        for ev in self.api.events(everysport.NHL):
-            counter += 1
-        self.assertTrue(counter == 720) #games in NHL  
+        events = self.api.events(everysport.NHL).fetchall()
+        self.assertTrue(len(events) == 720) #games in NHL  
 
-    @unittest.skip('Takes time')
+
     def test_events_allsvenskan_superettan(self):
         counter = 0
         for ev in self.api.events(
@@ -57,10 +47,12 @@ class TestApi(unittest.TestCase):
         self.assertTrue(counter == 480) #games in Allsvenskan  + Superettan
 
     
+
     def test_scores(self):
         for ev in self.api.events(everysport.ALLSVENSKAN).finished():    
             self.assertTrue(int(ev.home_team_score) >= 0)    
             self.assertTrue(int(ev.visiting_team_score) >= 0)
+
 
 
     def test_teams(self):
@@ -68,10 +60,10 @@ class TestApi(unittest.TestCase):
             self.assertTrue(len(ev.home_team.name) > 0 )    
             self.assertTrue(len(ev.visiting_team.name) > 0 )
 
-
     def test_round(self):
         for ev in self.api.events(everysport.ALLSVENSKAN).round(3):    
             self.assertEqual(ev.round, 3)  
+
 
     def test_rounds(self):
         for ev in self.api.events(everysport.ALLSVENSKAN).round(3,4,5,6):    

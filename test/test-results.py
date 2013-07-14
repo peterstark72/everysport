@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -17,30 +17,14 @@ class TestResults(unittest.TestCase):
         self.api = everysport.Api(APIKEY)  
 
 
-    def test_get_pos_round(self):        
-
-        standings = self.api.standings(everysport.ALLSVENSKAN).round(15).getall()
-
-        pos = standings.get_teamposition(everysport.HBG)
-
-        self.assertEqual(pos, 3 )
-
-
-
     def test_results_allsvenskan(self):
         results = self.api.get_results(everysport.ALLSVENSKAN)
-        self.assertTrue(len(results) > 0)
+        self.assertTrue(len(list(results)) > 0)
 
-
+    @unittest.skip("Takes time")        
     def test_results_nhl(self):
         results = self.api.get_results(everysport.NHL)
-        self.assertTrue(len(results) > 0)
-
-
-    def test_json(self):
-        results = self.api.get_results(everysport.ALLSVENSKAN)
-        self.assertTrue(len(results._asjson()) > 0 )
-
+        self.assertTrue(len(list(results)) > 0)
 
 
 
