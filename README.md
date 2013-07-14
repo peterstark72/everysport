@@ -35,13 +35,19 @@ for event in api.events(everysport.ALLSVENSKAN):
 
 ```
 
-The events() call returns an EventsQuery that lets you define what kind of events you want to fetch, for example:
+The events() call returns an EventsQuery that lets you select what kind of events you want to fetch, for example:
 - today()
 - fromdate()
 - todate()
 - round()
 - finished()
 - upcoming()
+
+For example: 
+
+```python
+api.events(everysport.ALLSVENSKAN).finished().today()
+``` 
 
 To actually fetch the events you can simply use it as an iterator, as in
 ```python
@@ -51,7 +57,10 @@ for event in api.events(everysport.ALLSVENSKAN):
 
 In this case you get one event at a time, and save memory. 
 
-Use fetchall() to load all events into a one list. 
+Or call ```fetchall()``` to load all events into a one list.
+```python
+events = api.events(everysport.ALLSVENSKAN).fetchall() #200+ events in one list
+```
 
 If you want events for more than one league, just add more into the events() call: 
 ```python
@@ -64,9 +73,32 @@ for event in swe_elite_football:
 
 ## Standings
 
-A league consist of one or many groups; for example, the different Conferences in NHL. Most leagues, however, has just one group. 
+A league consist of one or many groups; for example, the different Conferences in NHL. Most leagues, however, have just one group. 
 
-When you call standings(), you get a list of groups. 
+When you call standings(), you get a StandingsQuery on which you can call:
+- total()
+- home()
+- away()
+- round()
+
+Call fetchall() to fetch the selected standings. 
+
+```
+EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
+
+api = everysport.Api(EVERYSPORT_APIKEY)
+
+standings = api.standings(everysport.ALLSVENSKAN).total().fetchall() 
+
+allsvenskan = standings.group()        
+
+for teamstats in allsvenskan.standings:
+    print teamstats
+
+```
+
+
+
 
 
 
