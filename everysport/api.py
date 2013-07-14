@@ -196,11 +196,7 @@ class EventsQuery(ApiQuery):
 
     def fetchall(self):
         '''Returns a list of ALL events. This can be large, 500+ items for some leagues'''
-
-        events = []
-        for event in self:
-            events.append(event)
-        return events    
+        return list(self)
 
 
     def __iter__(self):
