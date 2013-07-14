@@ -24,19 +24,16 @@ python setup.py install
 You need an EVERYSPORT_APIKEY from support@everysport.com, then you create an Api instance and start requesting events and standings.
 
 ```python
-    api = everysport.Api(EVERYSPORT_APIKEY)
+EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
+api = everysport.Api(EVERYSPORT_APIKEY)
 
-    allsvenskan = api.events().upcoming().leagues(everysport.ALLSVENSKAN)    
-    for game in events_allsvenskan:
-        print game
-
-
-    standings = api.standings(everysport.ALLSVENSKAN).total()        
-    for standing in standings:
-        print standing
+for event in api.events(everysport.ALLSVENSKAN):
+    print event
 
 ```
+
+
 
 
 
