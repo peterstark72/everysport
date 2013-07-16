@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -7,16 +7,10 @@ import datetime
 import logging
 import os
 
-'''Getting the Everysport APIKEY from the system environment. 
-
-You need to set this with: 
-
-    export EVERYSPORT_APIKEY={YOUR KEY}
-'''
 APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
 
-class TestApi(unittest.TestCase):
+class TestEvents(unittest.TestCase):
 
     def setUp(self):        
         self.api = everysport.Api(APIKEY)
@@ -42,36 +36,36 @@ class TestApi(unittest.TestCase):
         counter = 0
         for ev in self.api.events(
                         everysport.ALLSVENSKAN, 
-                        everysport.SUPERETTAN):
+                        everysport.SUPERETTAN).run():
             counter += 1
         self.assertTrue(counter == 480) #games in Allsvenskan  + Superettan
 
     
 
     def test_scores(self):
-        for ev in self.api.events(everysport.ALLSVENSKAN).finished():    
+        for ev in self.api.events(everysport.ALLSVENSKAN).finished().run():    
             self.assertTrue(int(ev.home_team_score) >= 0)    
             self.assertTrue(int(ev.visiting_team_score) >= 0)
 
 
 
     def test_teams(self):
-        for ev in self.api.events(everysport.ALLSVENSKAN):    
+        for ev in self.api.events(everysport.ALLSVENSKAN).run():    
             self.assertTrue(len(ev.home_team.name) > 0 )    
             self.assertTrue(len(ev.visiting_team.name) > 0 )
 
     def test_round(self):
-        for ev in self.api.events(everysport.ALLSVENSKAN).round(3):    
+        for ev in self.api.events(everysport.ALLSVENSKAN).round(3).run():    
             self.assertEqual(ev.round, 3)  
 
 
     def test_rounds(self):
-        for ev in self.api.events(everysport.ALLSVENSKAN).round(3,4,5,6):    
+        for ev in self.api.events(everysport.ALLSVENSKAN).round(3,4,5,6).run():    
             self.assertTrue(ev.round >=3 or ev.round <= 6)  
 
 
     def test_team(self):
-        for ev in self.api.events(everysport.SHL).teams(everysport.LSD.id):
+        for ev in self.api.events(everysport.SHL).teams(everysport.LSD.id).run():
             self.assertTrue(everysport.LSD.id in (ev.home_team.id, ev.visiting_team.id))  
 
     
@@ -79,12 +73,12 @@ class TestApi(unittest.TestCase):
     # Events status
 
     def test_finished(self):
-        for ev in self.api.events(everysport.ALLSVENSKAN).finished():
+        for ev in self.api.events(everysport.ALLSVENSKAN).finished().run():
             self.assertEqual(ev.status, "FINISHED")    
 
 
     def test_upcoming(self):
-        for ev in self.api.events(everysport.ALLSVENSKAN).upcoming():
+        for ev in self.api.events(everysport.ALLSVENSKAN).upcoming().run():
             self.assertEqual(ev.status, "UPCOMING")    
 
 
@@ -94,7 +88,7 @@ class TestApi(unittest.TestCase):
         allsvenskan = self.api.events(everysport.ALLSVENSKAN)
         today = datetime.datetime.today()
 
-        for ev in allsvenskan.fromdate(today):
+        for ev in allsvenskan.fromdate(today).run():
             self.assertTrue(ev.start_date >= today)
             self.assertTrue(ev.time_zone == "CEST")
 

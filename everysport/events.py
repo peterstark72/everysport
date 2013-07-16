@@ -12,6 +12,8 @@ from collections import namedtuple
 from teams import Team as Team
 from resource import getresource as getresource
 
+import url_builder
+
 
 class Sport(namedtuple('Sport', "id, name")):
     __slots__ = () 
@@ -100,11 +102,12 @@ class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_
 
 
     @classmethod    
-    def from_resource(cls, url):
+    def from_url(cls, url):
 
         data = getresource(url)     
 
         return cls.from_dict(data.get('event', {}))
+
 
 
     def is_finished(self):
@@ -112,25 +115,67 @@ class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_
 
 
 
+class EventsIterator(object):
+    '''A list of events returned from the API'''
+    
+    def __init__(self, query):
+        self.query = query
 
 
+    def __iter__(self):
+        '''Generator over events.'''
+
+        done = False
+        while not done:
+            
+            url = url_builder.get_events_url(*self.query.league_ids, **self.query.params)
+            try:
+                data = getresource(url)                    
+                result = data.get('events', [])
+                offset = data['metadata']['offset']
+                limit = data['metadata']['limit']
+                count = data['metadata']['count']
+            except:
+                raise StopIteration
+            
+            done = count == 0 
+            if not done:
+                for ev in result:
+                    yield Event.from_dict(ev)
+                self.query.params['offset'] = offset + count
+            done = count < limit    
+
+
+ 
 
 class EventsList(list):
-    '''A list of events returned from the API'''
-    @classmethod
-    def from_resource(cls, url):
+    '''A list of events'''
+    def __init__(self, events):
+        for ev in events:
+            self.append(ev)
 
-        data = getresource(url)
+    def get_events_for_team(self, team_id):
+        '''Returns the list of events where the team takes part''' 
+        return EventsList([e for e in self if team_id in (e.home_team.id, e.visiting_team.id)])
 
-        obj = cls.__new__(cls)
 
-        for ev in data.get('events',[]):
-            obj.append(Event.from_dict(ev))
+    def groupby_rounds(self):
+        '''Returns a dictionary with rounds as keys'''
+        events_by_round = {}
+        for e in self:
+            events_by_round.setdefault(e.round, []).append(e)
+        return events_by_round
+    
 
-        obj.credit = Credit.from_dict(data.get('credit', {}))
-        
-        obj.offset = data['metadata']['offset']
-        obj.limit = data['metadata']['limit']
-        obj.count = data['metadata']['count']
 
-        return obj 
+
+
+
+
+
+
+
+
+
+
+

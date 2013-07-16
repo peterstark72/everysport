@@ -22,7 +22,7 @@ class TestApi(unittest.TestCase):
 
     
     def test_teamslist(self):
-        teams = self.api.get_teams(everysport.ALLSVENSKAN)
+        teams = self.api.standings(everysport.ALLSVENSKAN).fetchall().get_teams()
         self.assertTrue(len(teams) > 0)
 
 

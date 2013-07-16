@@ -18,6 +18,7 @@ class TestResults(unittest.TestCase):
 
 
     def test_results_allsvenskan(self):
+        
         results = self.api.get_results(everysport.ALLSVENSKAN)
 
         logging.debug(results)

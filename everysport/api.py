@@ -10,8 +10,9 @@ import datetime
 import logging
 
 
-from events import EventsList
+from events import EventsIterator
 from events import Event
+from events import EventsList
 from standings import StandingsGroupsList
 from results import Results 
 
@@ -78,7 +79,7 @@ class Api(object):
         url = url_builder.get_event_url(event_id, apikey=self.apikey)
 
         try:
-            event = Event.from_resource(url)    
+            event = Event.from_url(url)    
         except Exception as e:
             m = u"Could not load event {} : {}".format(event_id, e.message)
             logging.warning(m)
@@ -196,27 +197,13 @@ class EventsQuery(ApiQuery):
 
     def fetchall(self):
         '''Returns a list of ALL events. This can be large, 500+ items for some leagues'''
-        return list(self)
+        return EventsList(EventsIterator(self))
 
 
-    def __iter__(self):
-        '''Generator over events.'''
+    def run(self):
+        '''Returns an iterator'''
+        return EventsIterator(self)
 
-        done = False
-        while not done:
-            
-            url = url_builder.get_events_url(*self.league_ids, **self.params)
-            try:
-                result = EventsList.from_resource(url)
-            except:
-                raise StopIteration
-            
-            done = result.count == 0 
-            if not done:
-                for ev in result:
-                    yield ev
-                self.params['offset'] = result.offset + result.count
-            done = result.count < result.limit
 
 
 
