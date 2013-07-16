@@ -137,7 +137,7 @@ class StandingsGroupsList(list):
 
 
     def get_teams(self):
-        '''Returns the list of teams in the standings'''
+        '''Returns the list of teams in the standings. '''
         teams = []
         for group in self:
             for teamstats in group.standings:

@@ -10,10 +10,10 @@ import datetime
 import logging
 
 
-from events import EventsList as EventsList
-from events import Event as Event
-from standings import StandingsGroupsList as StandingsGroupsList
-from results import get_results_for_leagues as get_results_for_leagues
+from events import EventsList
+from events import Event
+from standings import StandingsGroupsList
+from results import Results 
 
 
 import url_builder
@@ -58,13 +58,13 @@ class Api(object):
         return StandingsQuery(self, league_id)
 
 
-    def get_results(self, *league_ids):
-        '''Return results for given leagues
+    def get_results(self, league_id):
+        '''Return results for given league
 
         Arguments:
         league_id - from everysport.com
         '''
-        return get_results_for_leagues(self, *league_ids)
+        return Results(self, league_id).load()
         
 
     def get_event(self, event_id):

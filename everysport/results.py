@@ -3,63 +3,68 @@
 '''results.py
 
 '''
-from collections import namedtuple
+from collections import namedtuple 
 
 
-class Result(namedtuple("Result", "team, home, round_, ga, gf, diff, pos, pos_change, against")):
-
-    __slots__ = ()
-    def _asjson(self):
-        '''Returns a JSON serializable object'''
-        return {
-            'team' : self.team._asdict(),
-            'against': self.against._asdict(),
-            'home' : self.home,
-            'round' : self.round_,
-            'ga' : self.ga,
-            'gf' : self.gf,
-            'diff' : self.diff,
-            'pos' : self.pos,
-            'posChange' : self.pos_change
-        }
+Result = namedtuple('Results', "gf, ga, against")
 
 
+class Results(list):
+    '''Generates''' 
 
-def get_results_for_leagues(api_client, *league_ids):
-    '''Generator for Results for given leagues.
+    def __init__(self, api_client, league_id):
 
-    Arguments:
-    league_ids - one or many league IDs
-    '''
+        self.events = api_client.events(league_id).finished().fetchall()
+        self.standings =  api_client.standings(league_id).fetchall()
 
-    for league_id in league_ids:
-        for event in api_client.events(league_id).finished():
+        self.number_of_rounds = max([event.round for event in self.events])
 
-            #Get standings for this round
-            standings = api_client.standings(event.league.id).round(event.round).fetchall()
-         
-            yield Result(
-                event.home_team,
-                True,
-                event.round,
-                event.visiting_team_score,
-                event.home_team_score,
-                event.home_team_score - event.visiting_team_score,
-                standings.get_teamposition(event.home_team.id),
-                0,
-                event.visiting_team)
+        self.standings_for_round = []
+        for r in range(self.number_of_rounds):
+            self.standings_for_round.append(api_client.standings(league_id).round(r+1).fetchall())
 
 
-            #Add visiting team stats
+    def get_events_for_team(self, team_id):
+        '''Returns the list of events where the team is home- or visiting''' 
+        return [e for e in self.events if team_id in (e.home_team.id, e.visiting_team.id)]
 
-            yield Result(
-                event.visiting_team,
-                False,
-                event.round,
-                event.home_team_score,
-                event.visiting_team_score,
-                event.visiting_team_score - event.home_team_score,
-                standings.get_teamposition(event.visiting_team.id),
-                0,
-                event.home_team)
+
+    def group_events_by_round(self, events):        
+        events_by_round = {}
+        for e in events:
+            events_by_round[e.round] = e
+        return events_by_round
+    
+
+       
+    def load(self):
+        '''Returns Result objects in the order of current standings'''
+
+        for team in self.standings.get_teams():
+
+            result = {}                
+            result['team'] = team
+            result['stats'] = self.standings.get_teamstats(team.id).__dict__
+
+            team_events = self.get_events_for_team(team.id)
+
+            events_by_round = self.group_events_by_round(team_events)
+
+            result['results'] = []
+            for r in reversed(range(len(self.standings_for_round))):
+                pos = self.standings_for_round[r].get_teamposition(team.id)
+                ev = events_by_round.get(r+1, None)
+
+                if not ev:
+                    result['results'].append({'pos': pos, 'event': None})
+                elif team.id == ev.home_team.id:
+                    result['results'].append({'pos': pos, 'event': Result(ev.home_team_score, ev.visiting_team_score, ev.visiting_team.name)._asdict()})
+                else:
+                    result['results'].append({'pos': pos, 'event': Result(ev.visiting_team_score, ev.home_team_score, ev.home_team.name)._asdict()})
+
+
+            self.append(result)
+
+        return self
+
 

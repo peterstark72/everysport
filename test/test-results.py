@@ -19,13 +19,12 @@ class TestResults(unittest.TestCase):
 
     def test_results_allsvenskan(self):
         results = self.api.get_results(everysport.ALLSVENSKAN)
-        self.assertTrue(len(list(results)) > 0)
 
-    @unittest.skip("Takes time")        
-    def test_results_nhl(self):
-        results = self.api.get_results(everysport.NHL)
-        self.assertTrue(len(list(results)) > 0)
+        logging.debug(results)
 
+        self.assertTrue(len(results) > 0)
+
+    
 
 
 if __name__ == '__main__': 
