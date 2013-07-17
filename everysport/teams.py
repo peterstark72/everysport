@@ -13,4 +13,3 @@ class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
             data.get('short_name', None),
             data.get('abbreviation', None)
         )
-

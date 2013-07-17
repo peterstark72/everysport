@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+'''Standings domain objects
 
-standings.py
-
+See Everysport API documentation at:
+https://github.com/menmo/everysport-api-documentation
 
 '''
 

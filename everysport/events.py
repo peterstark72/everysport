@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''events.py
+'''Event domain objects
 
+See Everysport API documentation at:
+https://github.com/menmo/everysport-api-documentation
 
 '''
 
@@ -11,6 +13,8 @@ from collections import namedtuple
 
 from teams import Team as Team
 from resource import getresource as getresource
+
+import url_builder
 
 
 class Sport(namedtuple('Sport', "id, name")):
@@ -69,6 +73,8 @@ class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
         )
 
 
+EventResult = namedtuple('EventResul', "gf, ga, against")
+    
 
 class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_team, visiting_team, home_team_score, visiting_team_score, finished_time_status, league,facts")):
     __slots__ = ()
@@ -100,7 +106,7 @@ class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_
 
 
     @classmethod    
-    def from_resource(cls, url):
+    def from_url(cls, url):
 
         data = getresource(url)     
 
@@ -114,23 +120,67 @@ class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_
 
 
 
+class EventsIterator(object):
+    '''A list of events returned from the API'''
+    
+    def __init__(self, query):
+        self.query = query
+
+
+    def __iter__(self):
+        '''Generator over events.'''
+
+        done = False
+        while not done:
+            
+            url = url_builder.get_events_url(*self.query.league_ids, **self.query.params)
+            try:
+                data = getresource(url)                    
+                result = data.get('events', [])
+                offset = data['metadata']['offset']
+                limit = data['metadata']['limit']
+                count = data['metadata']['count']
+            except:
+                raise StopIteration
+            
+            done = count == 0 
+            if not done:
+                for ev in result:
+                    yield Event.from_dict(ev)
+                self.query.params['offset'] = offset + count
+            done = count < limit    
+
+
+ 
 
 class EventsList(list):
-    '''A list of events returned from the API'''
-    @classmethod
-    def from_resource(cls, url):
+    '''A list of events'''
+    def __init__(self, events):
+        for ev in events:
+            self.append(ev)
 
-        data = getresource(url)
+    def get_events_for_team(self, team_id):
+        '''Returns the list of events where the team takes part''' 
+        return EventsList([e for e in self if team_id in (e.home_team.id, e.visiting_team.id)])
 
-        obj = cls.__new__(cls)
 
-        for ev in data.get('events',[]):
-            obj.append(Event.from_dict(ev))
+    def groupby(self, grouper):
+        '''Returns a dictionary with groups of events, set by grouper.'''
+        groups = {}
+        for e in self:
+            groups.setdefault(getattr(e,grouper), []).append(e)
+        return groups
+    
 
-        obj.credit = Credit.from_dict(data.get('credit', {}))
-        
-        obj.offset = data['metadata']['offset']
-        obj.limit = data['metadata']['limit']
-        obj.count = data['metadata']['count']
 
-        return obj 
+
+
+
+
+
+
+
+
+
+
+

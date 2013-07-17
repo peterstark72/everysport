@@ -11,7 +11,7 @@ EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY']
 api = everysport.Api(EVERYSPORT_APIKEY)
 
 
-for event in api.events(everysport.ALLSVENSKAN).today():
+for event in api.events(everysport.ALLSVENSKAN).upcoming().run():
     print event
 
 
