@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''events.py
+'''Event domain objects
 
+See Everysport API documentation at:
+https://github.com/menmo/everysport-api-documentation
 
 '''
 
@@ -71,6 +73,8 @@ class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
         )
 
 
+EventResult = namedtuple('EventResul', "gf, ga, against")
+    
 
 class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_team, visiting_team, home_team_score, visiting_team_score, finished_time_status, league,facts")):
     __slots__ = ()
@@ -109,9 +113,10 @@ class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_
         return cls.from_dict(data.get('event', {}))
 
 
-
     def is_finished(self):
         return self.status == Event.STATUS_FINISHED
+
+
 
 
 
@@ -159,12 +164,12 @@ class EventsList(list):
         return EventsList([e for e in self if team_id in (e.home_team.id, e.visiting_team.id)])
 
 
-    def groupby_rounds(self):
-        '''Returns a dictionary with rounds as keys'''
-        events_by_round = {}
+    def groupby(self, grouper):
+        '''Returns a dictionary with groups of events, set by grouper.'''
+        groups = {}
         for e in self:
-            events_by_round.setdefault(e.round, []).append(e)
-        return events_by_round
+            groups.setdefault(getattr(e,grouper), []).append(e)
+        return groups
     
 
 

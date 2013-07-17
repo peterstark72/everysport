@@ -5,7 +5,6 @@
 '''
 
 from api import Api, EverysportException
-import results
 
 from teams import Team 
 

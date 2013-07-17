@@ -1,19 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''results.py
+'''Results domain objects
+
+TeamResultList is a list of TeamResult
+
+TeamResult is a tuple with (team, stats and results),
+
+Resluts is a list of Result.
+
+A Result is a tuple with (pos, events)
 
 '''
 from collections import namedtuple 
 
+TeamResult = namedtuple('TeamResult', "team, stats, results")
+Result = namedtuple('Result', "pos, events")
 
-Result = namedtuple('Results', "gf, ga, against")
 
-
-class Results(list):
-    '''Generates''' 
+class TeamResultList(list):
 
     def __init__(self, api_client, league_id):
-
+        
         self.events = api_client.events(league_id).finished().fetchall()
         self.standings =  api_client.standings(league_id).fetchall()
 
@@ -29,25 +36,33 @@ class Results(list):
 
         for team in self.standings.get_teams():
 
-            result = {}                
-            result['team'] = team
-            result['stats'] = self.standings.get_teamstats(team.id).__dict__
+            #Get stats
+            stats = self.standings.get_teamstats(team.id)
 
+            #Get all events for this team
             team_events = self.events.get_events_for_team(team.id)
+            
+            #Group events by round
+            events_by_round = team_events.groupby('round')
 
-            events_by_round = team_events.groupby_rounds()
-
-            result['results'] = []
+            #Get result (pos, event) for every round
+            results = []
             for r in reversed(self.rounds):
-
                 pos = self.standings_for_round[r].get_teamposition(team.id)
-                
-                events = events_by_round.get(r, None)
+                events = events_by_round.get(r, [])
+                results.append(Result(pos, events))
 
-                result['results'].append({'pos': pos, 'events': events})
-
-            self.append(result)
+    
+            self.append(TeamResult(team, stats, results)) 
+            
 
         return self
+
+
+
+
+
+
+
 
 

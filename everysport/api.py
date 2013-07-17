@@ -14,7 +14,7 @@ from events import EventsIterator
 from events import Event
 from events import EventsList
 from standings import StandingsGroupsList
-from results import Results 
+from results import TeamResultList 
 
 
 import url_builder
@@ -65,7 +65,7 @@ class Api(object):
         Arguments:
         league_id - from everysport.com
         '''
-        return Results(self, league_id).load()
+        return TeamResultList(self, league_id).load()
         
 
     def get_event(self, event_id):
