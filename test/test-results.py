@@ -21,9 +21,13 @@ class TestResults(unittest.TestCase):
         
         results = self.api.get_results(everysport.ALLSVENSKAN)
 
-        logging.debug(results)
+        results_as_list = list(results)        
 
-        self.assertTrue(len(results) > 0)
+        number_of_teams = len(results_as_list)
+
+        logging.debug(results_as_list)
+
+        self.assertTrue(number_of_teams > 0)
 
 
         

@@ -17,7 +17,7 @@ TeamResult = namedtuple('TeamResult', "team, stats, results")
 Result = namedtuple('Result', "pos, events")
 
 
-class TeamResultList(list):
+class TeamResultList(object):
 
     def __init__(self, api_client, league_id):
         
@@ -30,8 +30,9 @@ class TeamResultList(list):
         for r in self.rounds:
             self.standings_for_round[r] = api_client.standings(league_id).round(r).fetchall()
 
+
        
-    def load(self):
+    def __iter__(self):
         '''Returns Result objects in the order of current standings'''
 
         for team in self.standings.get_teams():
@@ -53,10 +54,7 @@ class TeamResultList(list):
                 results.append(Result(pos, events))
 
     
-            self.append(TeamResult(team, stats, results)) 
-            
-
-        return self
+            yield TeamResult(team, stats, results)
 
 
 

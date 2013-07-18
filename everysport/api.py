@@ -65,7 +65,7 @@ class Api(object):
         Arguments:
         league_id - from everysport.com
         '''
-        return TeamResultList(self, league_id).load()
+        return TeamResultList(self, league_id)
         
 
     def get_event(self, event_id):

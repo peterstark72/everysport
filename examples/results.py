@@ -4,7 +4,6 @@
 import os
 
 import everysport
-from everysport.encoders import json_dumps
 
 
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
@@ -16,10 +15,7 @@ results = api.get_results(everysport.ALLSVENSKAN)
 
 
 for teamresult in results:
-    print teamresult.team.name.encode('utf-8')
-    print teamresult.stats.pts
-    print teamresult.results[0].events[0]
+    print teamresult
 
 
-print json_dumps(results)
 
