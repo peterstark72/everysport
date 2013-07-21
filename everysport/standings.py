@@ -1,17 +1,23 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-'''Standings domain objects
-
-See Everysport API documentation at:
-https://github.com/menmo/everysport-api-documentation
+'''Domain objects for Everysport Leagues
 
 '''
 
 from collections import namedtuple
+from collections import defaultdict
 
 
-from teams import Team as Team
-from resource import getresource as getresource
+
+class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
+    __slots__ = () #prevent creation of instance dict
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data.get('id', None),
+            data.get('name', None),
+            data.get('short_name', None),
+            data.get('abbreviation', None)
+        )
 
 
 class Label(namedtuple('Label', "name, type")):
@@ -22,8 +28,6 @@ class Label(namedtuple('Label', "name, type")):
             data.get('name', None),
             data.get('type', None)
         )
-
-
 
 
 class Stats(object):    
@@ -37,7 +41,6 @@ class Stats(object):
             setattr(obj,stat['name'],stat['value'])
         
         return obj
-
 
 
 class PositionStatus(namedtuple('PositionStatus', "name, type")):
@@ -63,89 +66,79 @@ class PositionStatuses(list):
 
 
 
-class Standings(namedtuple('Standings', "team, stats, position_statuses")):
+class Standings(namedtuple('Standings', 
+                "team stats position_statuses groups")):
     __slots__ = ()
-    @classmethod    
-    def from_dict(cls, data):
+    @classmethod
+    def from_dict(cls, data, group_labels):
         return cls(
-            Team.from_dict(data.get('team', {})),
-            Stats.from_list(data.get('stats',[])),
-            PositionStatuses.from_list(data.get('positionStatuses',  []))
+                Team.from_dict(data.get('team', {})), 
+                Stats.from_list(data.get('stats', [])), 
+                PositionStatuses.from_list(data.get('positionStatuses', [])), 
+                map( lambda x:x['name'], group_labels)
             )
 
 
 
-class StandingsGroup(namedtuple('StandingsGroup', "labels, standings")):
-    __slots__ = ()
-    @classmethod    
-    def from_dict(cls, data):
-
-        labels = []
-        for lbl in data.get('labels', []):
-            labels.append(Label.from_dict(lbl))
+class StandingsList(list):
+    '''List of Standings''' 
 
 
-        standings = []
-        for sta in data.get('standings', []):
-            standings.append(Standings.from_dict(sta))
+    def get_teamposition_and_stats(self, team):
+        for name, group in self.groups().items():
+            for pos, standing in enumerate(group, 1):
+                if team.id == standing.team.id:
+                    return pos, standing
+        return None
+
+
+
+    def group_labels(self):
+        '''Returns a Set of group labels for this league'''
+        group_labels = ()
+        for standing in self:
+            for group_label in standing.groups:
+                group_labels.append(group_label)
+
+        return group_labels
+
+
+    def groups(self):
+        '''Returns standings by group name'''
+        groups = defaultdict(list)
+        for standing in self:
+            if not standing.groups:
+                groups['default'].append(standing)
+            for group_label in standing.groups:
+                groups[group_label].append(standing)
+        return groups
+
+
+
+    def get_group_by_name(self, name):
+        '''Returns standings for the group whose name first matches the given name'''
+        for group in self.groups():
+            if group == name:
+                return group
+
+
+    def all_teams(self):
+        '''Returns an iterator of all teams in this league'''
+        return [standing.team for standing in self]
+
+
+
+
+
+
+
+
             
-        return cls(labels, standings)
 
 
 
 
 
-class StandingsGroupsList(list):
-    @classmethod
-    def from_resource(cls, url):
-
-        response = getresource(url)
-
-        obj = cls.__new__(cls)             
-
-        for group in response.get('groups', []):
-            obj.append(StandingsGroup.from_dict(group))
-
-        return obj
 
 
-    def group(self,x=0):
-        '''Returns the given group or None'''
-        if len(self)>x:
-            return self[x]
-        else:
-            return None
-
-    def get_teamposition(self, team_id):
-        '''Returns the position for a given team ID'''
-
-        for group in self:
-            for pos, teamstats in enumerate(group.standings,1):
-                if teamstats.team.id == team_id:
-                    return pos
-        return None 
-
-
-    def get_teamstats(self, team_id):
-        '''Returns Stats for given team ID'''
-
-        for group in self:
-            for teamstats in group.standings:
-                if teamstats.team.id == team_id:
-                    return teamstats.stats
-        return None                    
-
-
-    def get_teams(self):
-        '''Returns the list of teams in the standings. '''
-        teams = []
-        for group in self:
-            for teamstats in group.standings:
-                teams.append(teamstats.team)
-        return teams
     
-
-
-
-
-

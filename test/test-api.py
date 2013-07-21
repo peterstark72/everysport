@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -6,12 +6,6 @@ import everysport
 import logging
 import os
 
-'''Getting the Everysport APIKEY from the system environment. 
-
-You need to set this with: 
-
-    export EVERYSPORT_APIKEY={YOUR KEY}
-'''
 APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
 
@@ -27,12 +21,9 @@ class TestApi(unittest.TestCase):
     def test_unauthorized(self):
         foo = everysport.Api("foo")
         with self.assertRaises(everysport.EverysportException):
-            foo.get_event(2129667)
+            foo.event(2129667).get()
 
 
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='api.log', 
-                        level=logging.DEBUG, 
-                        filemode="w") 
     unittest.main()

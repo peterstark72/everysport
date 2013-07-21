@@ -1,26 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
-A simple library that wraps the Everysport API. 
+A wrapper for the Everysport API. 
 
 '''
 
-
+import urllib
+import urllib2
 import datetime
 import logging
+import hashlib
+import json
 
-
-from events import EventsIterator
 from events import Event
-from events import EventsList
-from standings import StandingsGroupsList
-from results import TeamResultList 
+from standings import Standings, StandingsList
 
 
-import url_builder
+BASE_API_URL = "http://api.everysport.com/v1/{}"
 
 
 class EverysportException(Exception):
+    '''Exception for the Everysport module'''
     pass
 
 
@@ -36,107 +36,108 @@ class Api(object):
                 https://github.com/menmo/everysport-api-documentation
 
         '''
-        self.apikey = apikey
+        self.key = apikey
 
 
-    def events(self, *league_ids):
-        '''Returns a Query object for events from one or many leagues
+    def standings(self, league_id):
+        '''Returns a StandingsQuery
 
         Arguments:
         league_ids - from everysport.com
 
         '''
-        return EventsQuery(self, *league_ids)
+
+        return StandingsQuery(self.key, league_id)
 
 
-    def standings(self, league_id):
-        '''Returns a Query object for standings
-
-        Arguments:
-        league_id - from everysport.com
-
-        '''
-        return StandingsQuery(self, league_id)
-
-
-    def get_results(self, league_id):
-        '''Return results for given league
+    def events(self, *league_ids):
+        '''Returns an EventsQuery for one or many leagues.
 
         Arguments:
-        league_id - from everysport.com
+        league_ids - from everysport.com
+
         '''
-        return TeamResultList(self, league_id)
+        return EventsQuery(self.key, *league_ids)
+
         
 
-    def get_event(self, event_id):
+    def event(self, event_id):
         '''Returns an Event for a given id  
 
         Arguments:
         event_id - from everysport.com
         
         '''
-
-        url = url_builder.get_event_url(event_id, apikey=self.apikey)
-
-        try:
-            event = Event.from_url(url)    
-        except Exception as e:
-            m = u"Could not load event {} : {}".format(event_id, e.message)
-            logging.warning(m)
-            raise EverysportException(m)
-
-        return event
+        return EventQuery(self.key, event_id)
             
  
 
-
-
 class ApiQuery(object):
-    '''Base class for all queries. '''
-    def __init__(self, api_client):
-        '''Initialized with the API and empty query '''
-        self.api_client = api_client
+
+    cache = {}
+
+    def __init__(self, apikey):
         self.params = {}
-        self.params['apikey'] = api_client.apikey
+        self.params['apikey'] = apikey
+        self.endpoint = ""
+
+
+    def _send_query(self):
+        '''Sends the Query and returns the response''' 
+
+        url = BASE_API_URL.format(self.endpoint) + "?" + urllib.urlencode(self.params)
+
+        #Check if already in cache, else add it
+        key = hashlib.md5(url).hexdigest()
+        if key not in ApiQuery.cache:
+            logging.info("Loading {}".format(url))
+            try:
+                response = urllib2.urlopen(url)
+                ApiQuery.cache[key] = json.load(response)
+            except Exception as e:
+                raise EverysportException('Could not load {} with {} : \n{}'.format(url, self.params, e.message))
+
+        return ApiQuery.cache[key]
+
+
+
+
+class EventQuery(ApiQuery):
+    '''Query for a specific Event'''
+
+    def __init__(self, apikey, event_id):
+        super(EventQuery, self).__init__(apikey)
+        self.endpoint = 'events/'+str(event_id)
+
+    def get(self):
+        data = self._send_query()
+        return Event.from_dict(data.get('event', {}))
 
 
 class StandingsQuery(ApiQuery):
-    '''A Query for a league's standings (tables). In most leagues, just one. But e.g. NHL have many groups.
-    '''    
 
-    def __init__(self, api_client, league_id):
-        super(StandingsQuery, self).__init__(api_client)
-        self.league_id = league_id
-
-    def total(self):
-        '''Queries for Total standings '''
-        self.params['type'] = 'total'
-        return self
-
-    def home(self):
-        '''Queries for Home standings '''
-        self.params['type'] = 'home'
-        return self     
-
-    def away(self):
-        '''Queries for Away standings '''
-        self.params['type'] = 'away'
-        return self     
+    def __init__(self, apikey, league_id):
+        super(StandingsQuery, self).__init__(apikey)
+        self.endpoint = 'leagues/'+str(league_id)+"/standings"
 
     def round(self, x):
-        '''Queries for a specific round '''
         self.params['round'] = x
-        return self 
+        return self
 
+    def list(self):
+        standings_list = StandingsList()
+        for s in self:
+            standings_list.append(s)
+        return standings_list
 
-    def fetchall(self):   
-        '''Returns a StandingsGroupsList of all standings groups'''
+    def __iter__(self):
+
+        data = self._send_query()        
         
-        url = url_builder.get_standings_url(self.league_id, **self.params)
-
-        return StandingsGroupsList.from_resource(url)
-
-
+        for group in data.get('groups', []):
+            group_labels = group.get('labels', [])
+            for standing in group.get('standings', []):
+                yield Standings.from_dict(standing, group_labels)
 
 
 
@@ -145,9 +146,10 @@ class EventsQuery(ApiQuery):
 
     '''
 
-    def __init__(self, api_client, *league_ids):
-        super(EventsQuery, self).__init__(api_client)
-        self.league_ids = league_ids
+    def __init__(self, apikey, *league_ids):
+        super(EventsQuery, self).__init__(apikey)
+        self.endpoint = 'events'
+        self.params['league'] = ",".join(map(str,league_ids))    
 
 
     def fromdate(self, d):
@@ -195,15 +197,26 @@ class EventsQuery(ApiQuery):
         return self 
 
 
-    def fetchall(self):
-        '''Returns a list of ALL events. This can be large, 500+ items for some leagues'''
-        return EventsList(EventsIterator(self))
-
-
-    def run(self):
+    def __iter__(self):
         '''Returns an iterator'''
-        return EventsIterator(self)
 
+        done = False
+        while not done:
+            try:
+                data = self._send_query()                    
+                result = data.get('events', [])
+                offset = data['metadata']['offset']
+                limit = data['metadata']['limit']
+                count = data['metadata']['count']
+            except:
+                raise StopIteration
+            
+            done = count == 0 
+            if not done:
+                for ev in result:
+                    yield Event.from_dict(ev)
+                self.params['offset'] = offset + count
+            done = count < limit 
 
 
 

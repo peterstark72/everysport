@@ -1,17 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import unittest
-import everysport
 import logging
 import os
 
-'''Getting the Everysport APIKEY from the system environment. 
 
-You need to set this with: 
+import everysport
 
-    export EVERYSPORT_APIKEY={YOUR KEY}
-'''
 APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
 
@@ -21,41 +17,26 @@ class TestStandings(unittest.TestCase):
         self.api = everysport.Api(APIKEY)
 
 
-    def test_standings(self):
-        for standings in self.api.standings(everysport.ALLSVENSKAN).fetchall():
-            self.assertTrue(len(standings.labels) >= 0)    
-            self.assertTrue(len(standings) > 0)   
+    def test_allsvenskan(self):
+        allsvenskan = self.api.standings(everysport.ALLSVENSKAN)
+        self.assertTrue(list(allsvenskan))   
 
 
-    def test_standings2(self):
-
-        standings = self.api.standings(everysport.ALLSVENSKAN).fetchall()
-        self.assertTrue(len(standings.group().labels) >= 0)
-        self.assertTrue(len(standings.group().standings) >= 0)    
-
-
-
-    def test_standings_swiss(self):
-        for standings in self.api.standings(everysport.SWISS_LEAGUE).fetchall():
-            self.assertTrue(len(standings.labels) >= 0)    
-            self.assertTrue(len(standings) > 0)  
+    def test_swiss(self):
+        swiss = self.api.standings(everysport.SWISS_LEAGUE)
+        self.assertTrue(list(swiss))
 
 
     def test_get_teamposition(self):
-        standings = self.api.standings(everysport.ALLSVENSKAN).round(15).fetchall()
-        pos = standings.get_teamposition(everysport.HBG.id)
-        self.assertEqual(pos, 3)
+        allsvenskan = self.api.standings(everysport.ALLSVENSKAN).round(16).list()
+        pos, _ = allsvenskan.get_teamposition_and_stats(everysport.MFF)
+        self.assertEqual(pos, 1)
 
-
-    def test_get_teamposition2(self):
-        standings = self.api.standings(everysport.ALLSVENSKAN).round(15).fetchall()
-        pos = standings.get_teamposition(666666) #Invalid
-        self.assertTrue(pos == None)
 
     
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='standings.log', 
+    logging.basicConfig(filename='leagues.log', 
                         level=logging.DEBUG, 
                         filemode="w") 
     unittest.main()

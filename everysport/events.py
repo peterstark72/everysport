@@ -11,10 +11,8 @@ import datetime
 from collections import namedtuple
 
 
-from teams import Team as Team
-from resource import getresource as getresource
+from leagues import Team
 
-import url_builder
 
 
 class Sport(namedtuple('Sport', "id, name")):
@@ -73,14 +71,9 @@ class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
         )
 
 
-EventResult = namedtuple('EventResul', "gf, ga, against")
-    
-
 class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_team, visiting_team, home_team_score, visiting_team_score, finished_time_status, league,facts")):
     __slots__ = ()
-
-    STATUS_FINISHED = "FINISHED"
-
+    
     @classmethod    
     def from_dict(cls, data):
         try:
@@ -103,80 +96,6 @@ class Event(namedtuple('Event', "id, start_date, time_zone, round, status, home_
                 League.from_dict(data.get('league',{})),
                 Facts.from_dict(data.get('facts', {}))
             )
-
-
-    @classmethod    
-    def from_url(cls, url):
-
-        data = getresource(url)     
-
-        return cls.from_dict(data.get('event', {}))
-
-
-    def is_finished(self):
-        return self.status == Event.STATUS_FINISHED
-
-
-
-
-
-class EventsIterator(object):
-    '''A list of events returned from the API'''
-    
-    def __init__(self, query):
-        self.query = query
-
-
-    def __iter__(self):
-        '''Generator over events.'''
-
-        done = False
-        while not done:
-            
-            url = url_builder.get_events_url(*self.query.league_ids, **self.query.params)
-            try:
-                data = getresource(url)                    
-                result = data.get('events', [])
-                offset = data['metadata']['offset']
-                limit = data['metadata']['limit']
-                count = data['metadata']['count']
-            except:
-                raise StopIteration
-            
-            done = count == 0 
-            if not done:
-                for ev in result:
-                    yield Event.from_dict(ev)
-                self.query.params['offset'] = offset + count
-            done = count < limit    
-
-
- 
-
-class EventsList(list):
-    '''A list of events'''
-    def __init__(self, events):
-        for ev in events:
-            self.append(ev)
-
-    def get_events_for_team(self, team_id):
-        '''Returns the list of events where the team takes part''' 
-        return EventsList([e for e in self if team_id in (e.home_team.id, e.visiting_team.id)])
-
-
-    def groupby(self, grouper):
-        '''Returns a dictionary with groups of events, set by grouper.'''
-        groups = {}
-        for e in self:
-            groups.setdefault(getattr(e,grouper), []).append(e)
-        return groups
-    
-
-
-
-
-
-
 
 
 
