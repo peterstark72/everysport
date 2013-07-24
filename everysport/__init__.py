@@ -6,10 +6,11 @@
 
 from api import Api, EverysportException
 
-from teams import Team 
+
+from commons import Team 
 
 MFF = Team(9375,u"Malmö FF", "", "")
-HBG = Team(9373,u"Helingsborgs IF", "", "")
+HIF = Team(9373,u"Helingsborgs IF", "", "")
 LSD = Team(1175,u"Leksand", "", "")
 CHI = Team(28075,u"Chicago Blackhawks", "", "")
 

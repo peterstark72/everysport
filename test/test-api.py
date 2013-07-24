@@ -6,24 +6,31 @@ import everysport
 import logging
 import os
 
-APIKEY = os.environ['EVERYSPORT_APIKEY'] 
-
 
 class TestApi(unittest.TestCase):
 
     def setUp(self):        
-        self.api = everysport.Api(APIKEY)
+        self.apikey = os.environ['EVERYSPORT_APIKEY'] 
 
 
     def test_api(self):
-        self.assertTrue(self.api)
+        api = everysport.Api(self.apikey)
+        self.assertTrue(api)
 
-    def test_unauthorized(self):
-        foo = everysport.Api("foo")
+    def test_api2(self):
+        api = everysport.Api("foo")
         with self.assertRaises(everysport.EverysportException):
-            foo.event(2129667).get()
+            api.league(everysport.ALLSVENSKAN)
+
+
+    def test_sport(self):
+        hockey = everysport.Sport.HOCKEY
+        self.assertEqual(hockey, 2)
 
 
 
 if __name__ == '__main__': 
+    logging.basicConfig(filename='test-api.log', 
+                        level=logging.DEBUG, 
+                        filemode="w") 
     unittest.main()
