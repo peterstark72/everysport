@@ -3,7 +3,6 @@
 
 import unittest
 import everysport
-import logging
 import os
 
 
@@ -23,14 +22,6 @@ class TestApi(unittest.TestCase):
             api.league(everysport.ALLSVENSKAN)
 
 
-    def test_sport(self):
-        hockey = everysport.Sport.HOCKEY
-        self.assertEqual(hockey, 2)
-
-
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='test-api.log', 
-                        level=logging.DEBUG, 
-                        filemode="w") 
     unittest.main()

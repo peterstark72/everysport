@@ -7,7 +7,7 @@
 from api import Api, EverysportException
 
 
-from commons import Team 
+from team import Team 
 
 MFF = Team(9375,u"Malmö FF", "", "")
 HIF = Team(9373,u"Helingsborgs IF", "", "")

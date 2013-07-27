@@ -1,9 +1,6 @@
-__author__ = 'peterstark72@gmail.com'
-__version__ = '1.0.6'
-
 from distutils.core import setup
 setup(name='everysport',
-      version='1.0.6',
+      version='1.0.7',
       packages=['everysport'],
       description='A Python wrapper for the Everysport API',
       author='Peter Stark',

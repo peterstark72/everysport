@@ -15,7 +15,6 @@ import json
 
 from league import League
 from event import Event
-from commons import Standing
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
@@ -135,32 +134,6 @@ class LeaguesQuery(ApiQuery):
                                     'leagues', League.from_dict, **self.params)
 
 
-class StandingsQuery(ApiQuery):
-
-    def __init__(self, api_client, league_id):
-        super(StandingsQuery, self).__init__(api_client)
-        self.league_id = league_id
-
-    def round(self, x):
-        self.params['round'] = x
-        return self
-
-    def fetch(self):
-        return list(self)         
-
-    def run(self):
-        return iter(self)
-
-
-    def __iter__(self):
-
-        endpoint = "leagues/" +str(self.league_id)+"/standings"
-        data = self.api_client._fetchresource(endpoint, **self.params)
-
-        for group in data.get('groups', []):
-            group_labels = group.get('labels', [])
-            for standing in group.get('standings', []):
-                yield Standing.from_dict(standing, group_labels)
 
 
 

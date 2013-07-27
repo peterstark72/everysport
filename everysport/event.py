@@ -5,9 +5,55 @@
 
 '''
 
+from collections import namedtuple
 
 from league import League
-from commons import Team, Facts, Date
+from team import Team
+from edate import Date
+
+
+class Arena(namedtuple('Arena', "id name")):
+    '''
+    Properties:
+    name - e.g. "Malmö Arena"
+    id - Arena ID
+
+    '''
+    __slots__ = () 
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data.get('id', None),
+            data.get('name', None)
+        )
+
+    def __str__(self):
+        return self.name.encode('utf-8')
+
+    def __eq__(self, other):
+        return self.id == other.id    
+
+
+class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
+    '''Facts about an event. 
+
+    Properties:
+    arena - an Everysport Arena object
+    referees - lista of referee names
+    shots - 
+    spectators - number of spectators at the event
+
+    '''
+    __slots__ = ()
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            Arena.from_dict(data.get('arena', {})),
+            data.get('spectators', None),
+            data.get('referees', []), #list of names
+            data.get('shots', None),
+        )
+
 
 
 class Event(object):
@@ -19,10 +65,10 @@ class Event(object):
             start_date=None,
             round_=None,
             status=None,
-            home_team=None,
-            visiting_team=None,
-            home_team_score=None,
-            visiting_team_score=None,
+            hometeam=None,
+            visitingteam=None,
+            hometeam_score=None,
+            visitingteam_score=None,
             finished_time_status=None,
             league=None,
             facts=None):
@@ -30,13 +76,13 @@ class Event(object):
         self.id=id
         self._start_date=start_date
         self.round=round_
-        self.home_team=home_team
-        self.visiting_team=visiting_team
-        self.home_team_score=home_team_score
-        self.visiting_team_score=visiting_team_score
+        self._hometeam=hometeam
+        self._visitingteam=visitingteam
+        self.hometeam_score=hometeam_score
+        self.visitingteam_score=visitingteam_score
         self.finished_time_status=finished_time_status
-        self.league=league
-        self.facts=facts
+        self._league=league
+        self._facts=facts
 
     @classmethod
     def from_dict(cls, api_client, data):
@@ -46,13 +92,13 @@ class Event(object):
                 data.get('startDate', None),
                 data.get('round',None),
                 data.get('status',None),
-                Team.from_dict(data.get('homeTeam',{})),
-                Team.from_dict(data.get('visitingTeam',{})),
+                data.get('homeTeam',{}),
+                data.get('visitingTeam',{}),
                 data.get('homeTeamScore',None),
                 data.get('visitingTeamScore',None),
                 data.get('finishedTimeStatus',None),
-                League.from_dict(api_client, data.get('league',{})),
-                Facts.from_dict(data.get('facts', {}))
+                data.get('league',{}),
+                data.get('facts', {})
             )
 
     @classmethod
@@ -61,13 +107,33 @@ class Event(object):
         data = api_client._fetchresource(endpoint)
         return cls.from_dict(api_client, data.get('event', {}))
 
+    def __str__(self):
+        return u"{:<20} v {:<20} at {} in {}".format(self.hometeam.name, self.visitingteam.name, self.start_date, self.league.name).encode('utf-8')
+
     @property        
     def start_date(self):
         if self._start_date:
-            return Date.from_str(self._start_date)
-            #return parsedate(self._start_date)
+            return Date(self._start_date)
+
+    @property
+    def hometeam(self):
+        if self._hometeam:
+            return Team.from_dict(self._hometeam)
+
+    @property
+    def visitingteam(self):
+        if self._visitingteam:
+            return Team.from_dict(self._visitingteam)
+
+    @property
+    def facts(self):
+        if self._facts:
+            return Facts.from_dict(self._facts)
+    
+    @property
+    def league(self):
+        if self._league:
+            return League.from_dict(self.api_client, self._league)
 
 
-    def __str__(self):
-        return u"{} {}, {} - {}".format(self.id, self.start_date.strftime("%Y%m%d"), self.home_team.name, self.visiting_team.name).encode('utf-8')
 

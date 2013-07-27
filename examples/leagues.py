@@ -12,7 +12,10 @@ api = everysport.Api(EVERYSPORT_APIKEY)
 hockey = api.leagues().sport(everysport.HOCKEY)
 
 for league in hockey:
-    print league.name, league.id
+    print league
+
+
+
 
 
 

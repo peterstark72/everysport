@@ -1,7 +1,7 @@
 Everysport Python 
 =================
 
-A Python wrapper for the [Everysport](https://github.com/menmo/everysport-api-documentation) API. The API lets you access events, standings and results from everysport.com. 
+A Python wrapper for the [Everysport](https://github.com/menmo/everysport-api-documentation) API. The API lets you access events, standings and results from [everysport.com](http://everysport.com). 
 
 
 ## Installation
@@ -41,7 +41,7 @@ for standing in api.league(everysport.ALLSVENSKAN).standings():
 
 ## Queries
 
-From ```events()``` you get an ```EventsQuery`` that lets you select what kind of events you want to fetch, for example:
+From ```events()``` you get query object that lets you select what kind of events you want to fetch, for example:
 - ```today()```
 - ```fromdate()```
 - ```todate()```
@@ -59,10 +59,16 @@ football_today = api.events().sport(everysport.FOOTBALL).today()
 
 ``` 
 
-To actually fetch the events you can use it as an iterator, as in
+To fetch the events, use the query as an iterator, as in
 ```python
 for event in football_today:
 	print event
+```
+
+Or use ```fetch``` to get all back as one list (not recommended, the number of events may be large for some leagues):
+
+```python
+all_hockey = api.events().sport(everysport.HOCKEY).leagues(everysport.SHL, everysport.NHL).fetch()
 ```
 
 In the same way you can query for leagues using ```leagues()```.
@@ -78,6 +84,62 @@ for league in hockey:
 ```
 
 The leagues are the current leagues, as seen on everysport.com. 
+
+
+## Leagues
+
+Leagues on Everysport are identified with a League ID, that can be looked up at everysport.com site, or by using the ```leagues()``` query API. Here are som League IDs for common leagues:
+
+```
+#Football
+ALLSVENSKAN = 57973
+SUPERETTAN = 57974
+
+#Hockey
+SHL = 60243
+NHL = 58878
+```
+
+You access a league in the following way: 
+```python
+shl = api.league(everysport.SHL)
+```
+
+Once you have the league you can start working with events:
+
+```python
+
+for event in sorted(shl.events(), key = lambda e:e.hometeam.name):
+    print event
+```
+
+And with standings:
+
+```python
+
+nhl = api.league(everysport.NHL).standings()
+
+print nhl #Complete league, all teams
+
+
+for g in nhl.groups(): 
+    print g 
+
+
+for g in nhl.groups('conference'): 
+    print g #Conferences
+
+
+print nhl.group("Western Conference")
+
+```
+
+
+
+
+
+
+
 
 
 

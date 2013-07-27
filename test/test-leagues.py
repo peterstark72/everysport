@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import logging
 import os
 
 
@@ -21,12 +20,9 @@ class TestLeagues(unittest.TestCase):
         allsvenskan = self.api.league(everysport.ALLSVENSKAN)
         self.assertTrue(allsvenskan)   
 
+        
 
 
-    
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='test-leagues.log', 
-                        level=logging.DEBUG, 
-                        filemode="w") 
     unittest.main()

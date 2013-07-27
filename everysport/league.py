@@ -3,11 +3,21 @@
 '''league.py
 
 
+
 '''
 
-import api
-from commons import Sport, Date
 import datetime
+
+from collections import namedtuple
+
+from edate import Date
+from standings import Standings
+
+
+
+Season = namedtuple('Season', "start end")
+Sport = namedtuple('Sport', "id name")
+
 
 class League(object):
     '''Everysport League object'''
@@ -23,10 +33,9 @@ class League(object):
         self.api_client=api_client
         self.id = id
         self._name = name
-        self.sport = sport
+        self._sport = sport
         self.team_class=team_class
-        self._start_date=start_date
-        self._end_date=end_date
+        self._season = Season(Date(start_date), Date(end_date))
 
     @classmethod
     def from_dict(cls, api_client, data):
@@ -35,7 +44,7 @@ class League(object):
             api_client,
             data.get('id', None),
             data.get('name', None),
-            Sport.from_dict(data.get('sport', {})),
+            data.get('sport', {}),
             data.get('teamClass',None), 
             data.get('startDate',None),
             data.get('endDate',None))
@@ -47,40 +56,49 @@ class League(object):
         data = api_client._fetchresource(endpoint)
         return cls.from_dict(api_client, data.get('league', {}))
 
-    @property
-    def start_date(self):
-        if self._start_date:
-            return Date.from_str(self._start_date)
 
-    @property        
-    def end_date(self):
-        if self._end_date:
-            return Date.from_str(self._end_date)
+    def __str__(self):
+        return u"{} ({}) {}".format(self.name, self.id, self.sport.name).encode('utf-8')
+
+
+    @property
+    def season(self):
+        return self._season
+
 
     @property
     def name(self):
         if self._name:
-            return self._name.encode('utf-8') 
+            return self._name 
+
+    @property
+    def sport(self):
+        if self._sport:
+            return Sport(self._sport.get('id'), self._sport.get('name'))
+
+
+    def is_men(self):
+        '''Returns True if the teamClass is MEN'''
+        return self.team_class == "MEN"
 
     def standings(self):
-        return api.StandingsQuery(self.api_client, self.id)
+        '''Returns Standings for this league'''
+        return Standings.find(self.api_client, self.id)
 
     def events(self):
+        '''Returns EventsQuery for this league'''
         return self.api_client.events().leagues(self.id)
 
     def teamlist(self):
+        '''Returns the list of teams for this league'''
         return [standing.team for standing in self.standings()]
 
     def rounds(self):
+        '''Returna a list of the rounds for which at least one event has finished''' 
         return {e.round for e in self.events().finished()}
 
-    def grouplabels(self):
-        '''Returns a Set of group labels for this league'''
-        return {label for standing in self.standings() for label in standing.groups}
 
-    def is_active(self):
-        today = datetime.date.today()
-        return today > self._league.start_date and today < self._league.end_date
+
 
 
 
