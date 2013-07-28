@@ -4,15 +4,7 @@
 '''A Python wrapper for the Everysport API
 '''
 
-from api import Api, EverysportException
-
-
-from team import Team 
-
-MFF = Team(9375,u"Malmö FF", "", "")
-HIF = Team(9373,u"Helingsborgs IF", "", "")
-LSD = Team(1175,u"Leksand", "", "")
-CHI = Team(28075,u"Chicago Blackhawks", "", "")
+from api import Everysport, EverysportException
 
 
 

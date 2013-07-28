@@ -18,9 +18,13 @@ class TestLeagues(unittest.TestCase):
 
     def test_allsvenskan(self):
         allsvenskan = self.api.league(everysport.ALLSVENSKAN)
-        self.assertTrue(allsvenskan)   
+        self.assertTrue(allsvenskan) 
 
-        
+
+    def test_season(self):
+        allsvenskan = self.api.league(everysport.ALLSVENSKAN)
+        self.assertTrue(allsvenskan.season.isactive())   
+
 
 
 

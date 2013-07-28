@@ -29,19 +29,19 @@ With the API-key you create an ```Api``` instance. With the Api you can request 
 ```python
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
-api = everysport.Api(EVERYSPORT_APIKEY)
+es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-for event in api.league(everysport.ALLSVENSKAN).events():
+for event in es.getleague(everysport.ALLSVENSKAN).events():
     print event
 
-for standing in api.league(everysport.ALLSVENSKAN).standings():
+for standing in es.league(everysport.ALLSVENSKAN).standings():
     print standing
 
 ```
 
 ## Queries
 
-From ```events()``` you get query object that lets you select what kind of events you want to fetch, for example:
+From ```events``` you get query object that lets you select what kind of events you want to fetch, for example:
 - ```today()```
 - ```fromdate()```
 - ```todate()```
@@ -55,7 +55,7 @@ For example:
 
 ```python
 
-football_today = api.events().sport(everysport.FOOTBALL).today()
+football_today = es.events.sport("Football").today()
 
 ``` 
 
@@ -68,18 +68,18 @@ for event in football_today:
 Or use ```fetch``` to get all back as one list (not recommended, the number of events may be large for some leagues):
 
 ```python
-all_hockey = api.events().sport(everysport.HOCKEY).leagues(everysport.SHL, everysport.NHL).fetch()
+all_hockey = es.events.sport("Hockey").leagues(everysport.SHL, everysport.NHL).fetch()
 ```
 
-In the same way you can query for leagues using ```leagues()```.
+In the same way you can query for leagues using ```leagues```.
 
 
 ```python
 
-hockey = api.leagues().sport(everysport.HOCKEY)
+hockey = es.leagues.sport("Hockey")
 
 for league in hockey:
-    print league.name, league.id
+    print league
 
 ```
 
@@ -88,7 +88,9 @@ The leagues are the current leagues, as seen on everysport.com.
 
 ## Leagues
 
-Leagues on Everysport are identified with a League ID, that can be looked up at everysport.com site, or by using the ```leagues()``` query API. Here are som League IDs for common leagues:
+Leagues on Everysport are identified with a League ID, that can be looked up at everysport.com site, or by using the ```leagues``` query. 
+
+Here are som League IDs for common leagues:
 
 ```
 #Football
@@ -102,14 +104,14 @@ NHL = 58878
 
 You access a league in the following way: 
 ```python
-shl = api.league(everysport.SHL)
+shl = es.league(everysport.SHL)
 ```
 
 Once you have the league you can start working with events:
 
 ```python
 
-for event in sorted(shl.events(), key = lambda e:e.hometeam.name):
+for event in sorted(shl.events, key = lambda e:e.hometeam.name):
     print event
 ```
 
@@ -117,7 +119,7 @@ And with standings:
 
 ```python
 
-nhl = api.league(everysport.NHL).standings()
+nhl = es.league(everysport.NHL).standings
 
 print nhl #Complete league, all teams
 

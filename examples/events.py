@@ -7,11 +7,10 @@ import everysport
 
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
-api = everysport.Api(EVERYSPORT_APIKEY)
+es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-football_today = api.events().sport(everysport.FOOTBALL).today()
 
-for event in football_today:
+for event in es.events.sport("Football").yesterday():
     print event
 
 

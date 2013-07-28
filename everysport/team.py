@@ -36,3 +36,10 @@ class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
 
     def __eq__(self, other):
         return self.id == other.id
+
+
+MFF = Team(9375,u"Malmö FF", "", "")
+HIF = Team(9373,u"Helingsborgs IF", "", "")
+LSD = Team(1175,u"Leksand", "", "")
+CHI = Team(28075,u"Chicago Blackhawks", "", "")
+        

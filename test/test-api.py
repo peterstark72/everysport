@@ -13,13 +13,13 @@ class TestApi(unittest.TestCase):
 
 
     def test_api(self):
-        api = everysport.Api(self.apikey)
-        self.assertTrue(api)
+        es = everysport.Everysport(self.apikey)
+        self.assertTrue(es)
 
     def test_api2(self):
-        api = everysport.Api("foo")
+        es = everysport.Everysport("foo")
         with self.assertRaises(everysport.EverysportException):
-            api.league(everysport.ALLSVENSKAN)
+            es.league(everysport.ALLSVENSKAN)
 
 
 

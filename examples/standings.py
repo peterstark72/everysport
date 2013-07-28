@@ -7,22 +7,22 @@ import everysport
 
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
-api = everysport.Api(EVERYSPORT_APIKEY)
+es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-nhl = api.league(everysport.NHL).standings()
-
-
-print nhl #Complete league, all teams
+nhl_standings = es.getleague(everysport.NHL).standings
 
 
-for g in nhl.groups(): 
+print nhl_standings #Complete league, all teams
+
+
+for g in nhl_standings.groups(): 
     print g #The groups
 
 
-for g in nhl.groups('conference'): 
+for g in nhl_standings.groups('conference'): 
     print g #Conferences
 
 
-print nhl.group("Western Conference")
+print nhl_standings.group("Western Conference")
 
 

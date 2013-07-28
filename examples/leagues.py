@@ -7,9 +7,9 @@ import everysport
 
 EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
-api = everysport.Api(EVERYSPORT_APIKEY)
+es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-hockey = api.leagues().sport(everysport.HOCKEY)
+hockey = es.leagues.sport("Hockey")
 
 for league in hockey:
     print league

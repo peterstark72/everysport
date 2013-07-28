@@ -12,10 +12,9 @@ from collections import namedtuple
 
 from edate import Date
 from standings import Standings
+from season import Season
 
 
-
-Season = namedtuple('Season', "start end")
 Sport = namedtuple('Sport', "id name")
 
 
@@ -35,7 +34,8 @@ class League(object):
         self._name = name
         self._sport = sport
         self.team_class=team_class
-        self._season = Season(Date(start_date), Date(end_date))
+        self._start_date = start_date
+        self._end_date = end_date
 
     @classmethod
     def from_dict(cls, api_client, data):
@@ -58,13 +58,12 @@ class League(object):
 
 
     def __str__(self):
-        return u"{} ({}) {}".format(self.name, self.id, self.sport.name).encode('utf-8')
+        return u"{} ({}) {} {}".format(self.name, self.id, self.season.timeuntilend(), self.sport.name).encode('utf-8')
 
 
     @property
     def season(self):
-        return self._season
-
+        return Season(self._start_date, self._end_date)
 
     @property
     def name(self):
@@ -76,18 +75,20 @@ class League(object):
         if self._sport:
             return Sport(self._sport.get('id'), self._sport.get('name'))
 
-
-    def is_men(self):
-        '''Returns True if the teamClass is MEN'''
-        return self.team_class == "MEN"
-
+    @property
     def standings(self):
         '''Returns Standings for this league'''
         return Standings.find(self.api_client, self.id)
 
+    @property
     def events(self):
         '''Returns EventsQuery for this league'''
         return self.api_client.events().leagues(self.id)
+
+    
+    def is_men(self):
+        '''Returns True if the teamClass is MEN'''
+        return self.team_class == "MEN"
 
     def teamlist(self):
         '''Returns the list of teams for this league'''

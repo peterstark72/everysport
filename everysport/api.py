@@ -19,20 +19,40 @@ from event import Event
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
 
+SPORTS_MAP = {
+'American Football': 18,
+'Badminton': 9,
+'Bandy': 3,
+'Baseball': 20,
+'Basket': 5,
+'Table Tennis': 8,
+'Bowling': 1,
+'Wrestling': 16,
+'Football': 10,
+'Handball': 7,
+'Floorball': 4,
+'Hockey': 2,
+'Rugby': 17,
+'Softball': 68,
+'Speedway': 15,
+'Squash': 22,
+'Tennis': 19,
+'Volleyball': 11}
+
 
 class EverysportException(Exception):
     '''Exception for the Everysport module'''
     pass
 
 
-class Api(object):
+class Everysport(object):
     '''A Python wrapper for the Everysport API
 
     Example usage: 
 
-    api = everysport.Api(APIKEY)
-    nhl = api.league(everysport.NHL)
-    hockey_leagues = api.leagues().sport(2)
+    es = everysport.Everysport(APIKEY)
+    nhl = es.league(everysport.NHL)
+    hockey_leagues = es.leagues.sport(2)
 
     '''
 
@@ -41,18 +61,20 @@ class Api(object):
     def __init__(self, apikey):
         self.apikey = apikey  
 
-    def league(self, league_id):
+    def getleague(self, league_id):
         '''Returns a League object '''
         return League.find(self, league_id)   
 
-    def event(self, event_id):
+    def getevent(self, event_id):
         '''Returns an Event object'''
         return Event.find(self, event_id)
 
+    @property
     def leagues(self):
         '''Returns LeaguesQuery'''
         return LeaguesQuery(self)
-
+    
+    @property 
     def events(self):
         '''Returns EventsQuery'''
         return EventsQuery(self)
@@ -103,20 +125,17 @@ class Api(object):
 
 
 
+
 class ApiQuery(object):
     '''Abstract object for Queries against the API'''
 
     def __init__(self, api_client):
         self.api_client  = api_client
         self.params = {}
-
-
-class LeaguesQuery(ApiQuery):
-    '''Query for leagues'''
-
+    
     def sport(self, *sports):
         '''Queries events for one or many sports, by Sport ID'''
-        self.params['sport'] = ",".join(map(str, sports))
+        self.params['sport'] = ",".join(map(str, [SPORTS_MAP[s] for s in sports if s in SPORTS_MAP]))
         return self
 
 
@@ -125,15 +144,17 @@ class LeaguesQuery(ApiQuery):
 
 
     def run(self):
-        return iter(self)
+        return iter(self)        
+
+
+class LeaguesQuery(ApiQuery):
+    '''Query for leagues'''
 
 
     def __iter__(self):
         '''Returns an iterator over the result'''
         return self.api_client._fetchpages('leagues', 
                                     'leagues', League.from_dict, **self.params)
-
-
 
 
 
@@ -166,6 +187,13 @@ class EventsQuery(ApiQuery):
         return self 
 
 
+    def yesterday(self):
+        '''Queries events from yesterday'''
+        yesterday = datetime.date.today() - datetime.timedelta(days=1)
+        self.params['toDate'] = self.params['fromDate'] = yesterday.strftime('%Y-%m-%d')
+        return self         
+
+
     def upcoming(self):
         '''Queries for all upcoming events'''
         self.params['status'] = "UPCOMING"
@@ -174,11 +202,6 @@ class EventsQuery(ApiQuery):
     def finished(self):
         '''Queries for all finished events'''
         self.params['status'] = "FINISHED"
-        return self
-
-    def sport(self, *sports):
-        '''Queries events for one or many sports, by Sport ID'''
-        self.params['sport'] = ",".join(map(str, sports))
         return self
 
     def teams(self, *teams):
@@ -190,14 +213,6 @@ class EventsQuery(ApiQuery):
         '''Queries for a specific round '''
         self.params['round'] = ",".join(map(str,x))
         return self 
-
-
-    def fetch(self):
-        return list(self)
-
-
-    def run(self):
-        return iter(self)
 
 
     def __iter__(self):

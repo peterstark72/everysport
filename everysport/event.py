@@ -9,7 +9,7 @@ from collections import namedtuple
 
 from league import League
 from team import Team
-from edate import Date
+from etypes import parsedate as parsedate
 
 
 class Arena(namedtuple('Arena', "id name")):
@@ -108,12 +108,12 @@ class Event(object):
         return cls.from_dict(api_client, data.get('event', {}))
 
     def __str__(self):
-        return u"{:<20} v {:<20} at {} in {}".format(self.hometeam.name, self.visitingteam.name, self.start_date, self.league.name).encode('utf-8')
+        return u"{:<20} v {:<20} at {} in {} [{}]".format(self.hometeam.name, self.visitingteam.name, self.start_date, self.league.name, self.league.sport.name).encode('utf-8')
 
     @property        
     def start_date(self):
         if self._start_date:
-            return Date(self._start_date)
+            return parsedate(self._start_date)
 
     @property
     def hometeam(self):
