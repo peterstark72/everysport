@@ -9,7 +9,7 @@ from collections import namedtuple
 
 from league import League
 from team import Team
-from etypes import parsedate as parsedate
+from commons import parsedate as parsedate
 
 
 class Arena(namedtuple('Arena', "id name")):

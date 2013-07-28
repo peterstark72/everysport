@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''etypes.py
-Common Everysport data types and functions.
+'''commons.py
+Common data types and functions.
 
 '''
 

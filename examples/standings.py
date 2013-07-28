@@ -2,27 +2,36 @@
 # -*- coding: utf-8 -*-
 
 import os
+
+import logging 
+
 import everysport
 
 
-EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
+def main():
+    EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
-es = everysport.Everysport(EVERYSPORT_APIKEY)
+    es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-nhl_standings = es.getleague(everysport.NHL).standings
+    allsvenskan = es.getleague(everysport.ALLSVENSKAN)
 
+    print allsvenskan
 
-print nhl_standings #Complete league, all teams
+    print allsvenskan.get_current_round()
 
-
-for g in nhl_standings.groups(): 
-    print g #The groups
-
-
-for g in nhl_standings.groups('conference'): 
-    print g #Conferences
+    for e in allsvenskan.events:
+        print e
 
 
-print nhl_standings.group("Western Conference")
+
+
+if __name__ == '__main__': 
+    logging.basicConfig(filename=__file__+'.log', 
+                    level=logging.DEBUG, 
+                    filemode="w") 
+    main()
+
+
+
 
 

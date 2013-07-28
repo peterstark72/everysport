@@ -22,6 +22,7 @@ class Stats(namedtuple("Stats", STATS)):
 
 
 class TeamStanding(namedtuple('TeamStanding', "team stats status groups")):
+    '''A team's Standing consists of the  Team, it's Stats, status and the groups it plays in.'''
     __slots__ = ()
     @classmethod
     def from_dict(cls, data, group_labels):
@@ -42,9 +43,9 @@ class Standings(list):
                 self.append (TeamStanding.from_dict(standing, group_labels))
 
     @classmethod
-    def find(cls, api_client, league_id):
+    def find(cls, api_client, league_id, round_="", type_="total"):
         endpoint = "leagues/" +str(league_id)+"/standings"
-        data = api_client._fetchresource(endpoint)
+        data = api_client._fetchresource(endpoint, round=round_, type=type_)
         return cls(data.get('groups', []))
 
 
@@ -80,6 +81,9 @@ class Standings(list):
 
     def group(self, name):
         return [s for s in self if name in [g['name'] for g in s.groups]]
+
+
+
 
 
 

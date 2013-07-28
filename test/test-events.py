@@ -2,32 +2,46 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import everysport
 import os
 import logging
+import datetime
 
 
+import everysport
 
 
 class TestEvents(unittest.TestCase):
 
     def setUp(self):        
-        self.api = everysport.Api(os.environ['EVERYSPORT_APIKEY'] )
+        self.es = everysport.Everysport(os.environ['EVERYSPORT_APIKEY'] )
 
 
     def test_single_event(self):
-        ev = self.api.event(2129667)
+        ev = self.es.getevent(2129667)
         self.assertEqual(ev.id, 2129667)
 
     
     def test_events_allsvenskan(self):
-        events = list(self.api.events().leagues(everysport.ALLSVENSKAN))
+        events = self.es.events.leagues(everysport.ALLSVENSKAN).fetch()
         self.assertTrue(len(events) == 240) #games in Allsvenskan  
 
-
+    @unittest.skip("Takes for ever")        
     def test_events_nhl(self):
-        events = list(self.api.events().leagues(everysport.NHL))
-        self.assertTrue(len(events) == 720) #games in NHL  
+        events = self.es.events.leagues(everysport.NHL).fetch()
+        self.assertTrue(len(events) == 720) #games in NHL 
+
+
+    def test_sport(self):
+        football  = self.es.events.sport("Football")
+        self.assertTrue(football)
+
+
+
+    def test_today(self):
+        events_today = self.es.events.today().fetch()
+        for event in events_today:
+            self.assertEqual(event.start_date.day, datetime.datetime.today().day)
+
     
 
 if __name__ == '__main__': 

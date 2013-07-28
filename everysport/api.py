@@ -15,6 +15,7 @@ import json
 
 from league import League
 from event import Event
+from standings import Standings
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
@@ -68,6 +69,7 @@ class Everysport(object):
     def getevent(self, event_id):
         '''Returns an Event object'''
         return Event.find(self, event_id)
+
 
     @property
     def leagues(self):

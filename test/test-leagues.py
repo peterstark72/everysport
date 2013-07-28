@@ -13,17 +13,23 @@ APIKEY = os.environ['EVERYSPORT_APIKEY']
 class TestLeagues(unittest.TestCase):
 
     def setUp(self):        
-        self.api = everysport.Api(APIKEY)
+        self.es = everysport.Everysport(APIKEY)
 
 
     def test_allsvenskan(self):
-        allsvenskan = self.api.league(everysport.ALLSVENSKAN)
+        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
         self.assertTrue(allsvenskan) 
 
 
     def test_season(self):
-        allsvenskan = self.api.league(everysport.ALLSVENSKAN)
+        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
         self.assertTrue(allsvenskan.season.isactive())   
+
+
+    def test_sport(self):
+        hockey = self.es.leagues.sport("Hockey")
+        for league in hockey:
+            self.assertEqual(league.sport.id, 2) 
 
 
 

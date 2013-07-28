@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 '''season.py
 
-Everysport teams are defined with an ID. They always have a name, and may also have a short name and an abbreviation.
-
+Every League has a Season and each season has diffferent start and end dates.   
 
 '''
 
 import datetime
 
-from etypes import parsedate as parsedate
+from commons import parsedate as parsedate
 
 
 class Season(object):
@@ -25,15 +24,16 @@ class Season(object):
         self.end = parsedate(end)
 
     def __str__(self):
-        return "{} - {}".format(self.start, self.end)
+        return "{} - {}".format(self.start.strftime("%Y%m%d"), 
+                                self.end.strftime("%Y%m%d"))
 
     def isactive(self):
-        '''Returns True of the season is active today'''
+        '''Returns True if the season is active today'''
         today = datetime.datetime.today()
         return (today > self.start and today < self.end)
 
     def timeuntilend(self):
-        '''Returns the timedelta until the season ends'''
+        '''Returns the number of days until the season ends'''
         if self.end:
             return (self.end - datetime.datetime.today()).days
 
