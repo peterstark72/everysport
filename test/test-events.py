@@ -8,6 +8,7 @@ import datetime
 
 
 import everysport
+from everysport.league import ALLSVENSKAN, NHL
 
 
 class TestEvents(unittest.TestCase):
@@ -22,12 +23,12 @@ class TestEvents(unittest.TestCase):
 
     
     def test_events_allsvenskan(self):
-        events = self.es.events.leagues(everysport.ALLSVENSKAN).fetch()
+        events = self.es.events.leagues(ALLSVENSKAN).fetch()
         self.assertTrue(len(events) == 240) #games in Allsvenskan  
 
     @unittest.skip("Takes for ever")        
     def test_events_nhl(self):
-        events = self.es.events.leagues(everysport.NHL).fetch()
+        events = self.es.events.leagues(NHL).fetch()
         self.assertTrue(len(events) == 720) #games in NHL 
 
 
@@ -45,7 +46,7 @@ class TestEvents(unittest.TestCase):
     
 
 if __name__ == '__main__': 
-    logging.basicConfig(filename='test-events.log', 
+    logging.basicConfig(filename=__file__+'.log', 
                         level=logging.DEBUG, 
                         filemode="w") 
     unittest.main()

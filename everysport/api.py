@@ -15,12 +15,11 @@ import json
 
 from league import League
 from event import Event
-from standings import Standings
 
 
 BASE_API_URL = "http://api.everysport.com/v1/{}"
 
-SPORTS_MAP = {
+SPORT_ID_MAP = {
 'American Football': 18,
 'Badminton': 9,
 'Bandy': 3,
@@ -51,9 +50,15 @@ class Everysport(object):
 
     Example usage: 
 
+    #Create Everysport object 
     es = everysport.Everysport(APIKEY)
-    nhl = es.league(everysport.NHL)
-    hockey_leagues = es.leagues.sport(2)
+    
+    #NHL
+    nhl = es.getleague(everysport.NHL)
+    
+
+    hockey_leagues = es.leagues.sport("Hockey")
+    football_leagues = es.leagues.sport("Football")
 
     '''
 
@@ -63,8 +68,19 @@ class Everysport(object):
         self.apikey = apikey  
 
     def getleague(self, league_id):
-        '''Returns a League object '''
-        return League.find(self, league_id)   
+        '''Returns a League given League ID '''
+        return League.find(self, league_id) 
+
+    def getleague_by_name(self, name, sport):
+        '''Looks up a league given name and sport
+
+        This only works for current leagues, on everysport.com today. To get older leagues, you need the ID and use getleague() method. 
+
+        ''' 
+        for league in self.leagues.sport(sport):
+            if league.name == name:
+                return league  
+
 
     def getevent(self, event_id):
         '''Returns an Event object'''
@@ -137,7 +153,7 @@ class ApiQuery(object):
     
     def sport(self, *sports):
         '''Queries events for one or many sports, by Sport ID'''
-        self.params['sport'] = ",".join(map(str, [SPORTS_MAP[s] for s in sports if s in SPORTS_MAP]))
+        self.params['sport'] = ",".join(map(str, [SPORT_ID_MAP[s] for s in sports if s in SPORT_ID_MAP]))
         return self
 
 

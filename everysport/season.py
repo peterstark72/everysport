@@ -8,7 +8,7 @@ Every League has a Season and each season has diffferent start and end dates.
 
 import datetime
 
-from commons import parsedate as parsedate
+from commons import Date
 
 
 class Season(object):
@@ -20,8 +20,8 @@ class Season(object):
 
     '''
     def __init__(self, start, end):
-        self.start = parsedate(start)
-        self.end = parsedate(end)
+        self.start = Date(start)
+        self.end = Date(end)
 
     def __str__(self):
         return "{} - {}".format(self.start.strftime("%Y%m%d"), 
@@ -34,8 +34,11 @@ class Season(object):
 
     def timeuntilend(self):
         '''Returns the number of days until the season ends'''
-        if self.end:
-            return (self.end - datetime.datetime.today()).days
+        days = (self.end - datetime.datetime.today()).days
+        if days < 0:
+            return 0
+        else:
+            return days
 
 
 

@@ -40,7 +40,7 @@ class Standings(list):
         for group in groups:
             group_labels = group.get('labels', [])
             for standing in group.get('standings', []):
-                self.append (TeamStanding.from_dict(standing, group_labels))
+                self.append(TeamStanding.from_dict(standing, group_labels))
 
     @classmethod
     def find(cls, api_client, league_id, round_="", type_="total"):
@@ -81,6 +81,24 @@ class Standings(list):
 
     def group(self, name):
         return [s for s in self if name in [g['name'] for g in s.groups]]
+
+
+    def getteamposition(self, team, group_name=None):
+
+        if not group_name:
+            position_group = self
+        else:
+            position_group = self.group(group_name)
+
+        for pos, standing in enumerate(position_group,1):
+            if standing.team == team:
+                return pos
+
+
+    def getstats(self, team):
+        for s in self:
+            if s.team == team:
+                return s.stats
 
 
 

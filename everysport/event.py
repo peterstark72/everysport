@@ -9,29 +9,8 @@ from collections import namedtuple
 
 from league import League
 from team import Team
-from commons import parsedate as parsedate
+from commons import Date, IdentityObject
 
-
-class Arena(namedtuple('Arena', "id name")):
-    '''
-    Properties:
-    name - e.g. "Malmö Arena"
-    id - Arena ID
-
-    '''
-    __slots__ = () 
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            data.get('id', None),
-            data.get('name', None)
-        )
-
-    def __str__(self):
-        return self.name.encode('utf-8')
-
-    def __eq__(self, other):
-        return self.id == other.id    
 
 
 class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
@@ -48,7 +27,7 @@ class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
     @classmethod
     def from_dict(cls, data):
         return cls(
-            Arena.from_dict(data.get('arena', {})),
+            IdentityObject.from_dict(data.get('arena', {})),
             data.get('spectators', None),
             data.get('referees', []), #list of names
             data.get('shots', None),
@@ -112,8 +91,7 @@ class Event(object):
 
     @property        
     def start_date(self):
-        if self._start_date:
-            return parsedate(self._start_date)
+        return Date(self._start_date)
 
     @property
     def hometeam(self):

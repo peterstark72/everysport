@@ -12,10 +12,22 @@ from collections import namedtuple
 
 from standings import Standings
 from season import Season
+from commons import IdentityObject
 
 
-Sport = namedtuple('Sport', "id name")
 
+
+'''
+    Leagues
+'''
+#Football
+ALLSVENSKAN = 57973
+SUPERETTAN = 57974
+
+#Hockey
+SWISS_LEAGUE = 58882
+SHL = 60243
+NHL = 58878
 
 
 class League(object):
@@ -62,12 +74,9 @@ class League(object):
         return u"{} ({}) {} {}".format(self.name, self.id, self.season.timeuntilend(), self.sport.name).encode('utf-8')
 
 
-    def _getstandings(self, standings_type="total"):
-        '''Returns a specific standings'''
-        return Standings.find(self.api_client, 
-                                self.id, 
-                                self._round, 
-                                standings_type)
+
+    def _get_current_round(self):
+        return max(self.rounds())
 
 
     @property
@@ -82,30 +91,42 @@ class League(object):
     @property
     def sport(self):
         if self._sport:
-            return Sport(self._sport.get('id'), self._sport.get('name'))
+            return IdentityObject(self._sport.get('id'), self._sport.get('name'))
+
+
+    def _getstandings(self, round_="", type_="total"):
+        return Standings.find(self.api_client, self.id, round_, type_)
+
+
+    @property 
+    def standings(self):
+        '''Returns Total Standings for this league'''
+        return self.totals 
 
     @property
     def totals(self):
         '''Returns Total Standings for this league'''
-        return self._getstandings("total")
+        return self._getstandings(self._round, "total")
 
     @property
     def home(self):
-        '''Returns Total Standings for this league'''
-        return self._getstandings("home")
+        '''Returns Home Standings for this league'''
+        return self._getstandings(self._round, "home")
 
     @property
     def away(self):
-        '''Returns Total Standings for this league'''
-        return self._getstandings("away")
+        '''Returns Away Standings for this league'''
+        return self._getstandings(self._round, "away")
 
 
     def round(self, r):
+        '''Set set the league to a specifc round'''
         self._round = r 
         return self    
 
     def current(self):
-        self._round = self.get_current_round()
+        '''Set set the league to current (latest) round'''
+        self._round = ""
         return self  
 
     @property        
@@ -121,7 +142,7 @@ class League(object):
         '''Returns list of results until the current round. If no round is set, you get all finished events until today.'''
         q = self.api_client.events.leagues(self.id)
         if self._round:
-            q = q.round(*range(1,self._round+1))
+            q = q.round(*range(1,self._round+1)).finished()
         else:
             q = q.finished()
         return q.fetch()
@@ -129,24 +150,17 @@ class League(object):
 
     @property 
     def allevents(self):
-        '''Returns iterator of all events'''
+        '''Returns iterator of all events, in all rounds'''
         return self.api_client.events.leagues(self.id)
+
 
     @property
     def teamlist(self):
-        '''Returns the list of teams for this league'''
+        '''The list of teams'''
         return [standing.team for standing in self.standings]
 
- 
-    def rounds(self):
-        '''Returna a list of the rounds for which at least one event has finished''' 
+
+    @property
+    def roundslist(self):
+        '''The list of the rounds for which at least one event has finished''' 
         return {e.round for e in self.allevents.finished()}
-
-
-    def get_current_round(self):
-        return max(self.rounds())
-
-
-
-
-

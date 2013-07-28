@@ -13,16 +13,17 @@ def main():
 
     es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-    allsvenskan = es.getleague(everysport.ALLSVENSKAN)
+    
+    allsvenskan = es.getleague_by_name("Allsvenskan", "Football")
 
-    print allsvenskan
+    #nhl = es.getleague_by_name("NHL", "Hockey")
 
-    print allsvenskan.get_current_round()
+    print allsvenskan.totals
 
-    for e in allsvenskan.events:
-        print e
+    print allsvenskan.getpositiontrends()
 
 
+    
 
 
 if __name__ == '__main__': 

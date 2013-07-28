@@ -6,23 +6,23 @@ import os
 
 
 import everysport
+from everysport.league import ALLSVENSKAN, NHL
 
-APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
 
 class TestLeagues(unittest.TestCase):
 
     def setUp(self):        
-        self.es = everysport.Everysport(APIKEY)
+        self.es = everysport.Everysport(os.environ['EVERYSPORT_APIKEY'] )
 
 
     def test_allsvenskan(self):
-        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
+        allsvenskan = self.es.getleague(ALLSVENSKAN)
         self.assertTrue(allsvenskan) 
 
 
     def test_season(self):
-        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
+        allsvenskan = self.es.getleague(ALLSVENSKAN)
         self.assertTrue(allsvenskan.season.isactive())   
 
 
