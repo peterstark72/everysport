@@ -12,8 +12,6 @@ from collections import namedtuple
 
 from standings import Standings
 from season import Season
-from commons import IdentityObject
-
 
 
 
@@ -28,6 +26,26 @@ SUPERETTAN = 57974
 SWISS_LEAGUE = 58882
 SHL = 60243
 NHL = 58878
+
+
+
+class Sport(namedtuple('Sport', "id name")):
+    '''A tuple with an ID and a name'''
+    __slots__ = () 
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data.get('id', None),
+            data.get('name', None)
+        )
+
+
+    def __repr__(self):
+        return "Sport({})".format(",".join(map(repr,[self.name, self.id])))        
+
+    def __eq__(self, other):
+        return self.id == other.id  
+
 
 
 class League(object):
@@ -70,9 +88,8 @@ class League(object):
         return cls.from_dict(api_client, data.get('league', {}))
 
 
-    def __str__(self):
-        return u"{} ({}) {} {}".format(self.name, self.id, self.season.timeuntilend(), self.sport.name).encode('utf-8')
-
+    def __repr__(self):
+        return "League({})".format(",".join(map(repr, [self.name, self.id, self.season, self.sport])))
 
 
     def _get_current_round(self):
@@ -86,12 +103,12 @@ class League(object):
     @property
     def name(self):
         if self._name:
-            return self._name 
+            return self._name
 
     @property
     def sport(self):
         if self._sport:
-            return IdentityObject(self._sport.get('id'), self._sport.get('name'))
+            return Sport(self._sport.get('id'), self._sport.get('name'))
 
 
     def _getstandings(self, round_="", type_="total"):

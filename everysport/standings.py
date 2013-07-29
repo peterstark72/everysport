@@ -33,6 +33,10 @@ class TeamStanding(namedtuple('TeamStanding', "team stats status groups")):
             group_labels)
 
 
+    def __repr__(self):
+        return "TeamStanding({})".format(",".join(map(repr, [self.team, self.stats])))
+
+
 class Standings(list):
     '''List of Everysport Standings for a league'''
 
@@ -47,6 +51,10 @@ class Standings(list):
         endpoint = "leagues/" +str(league_id)+"/standings"
         data = api_client._fetchresource(endpoint, round=round_, type=type_)
         return cls(data.get('groups', []))
+
+
+    def __repr__(self):
+        return "Standings({})".format(",".join(map(repr, self)))
 
 
     def league(self):

@@ -18,6 +18,7 @@ class TestTrends(unittest.TestCase):
     def test_allsvenskan(self):
         allsvenskan = self.es.getleague_by_name("Allsvenskan", "Football")
         trend = everysport.trends.positiontrend(self.es, allsvenskan)
+        logging.debug(trend)
         self.assertTrue(trend)
 
         

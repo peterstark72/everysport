@@ -30,12 +30,13 @@ class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
             data.get('abbreviation', None)
         )
 
+    def __repr__(self):
+        return "Team({})".format(self.name.encode('utf-8'))
 
-    def __str__(self):
-        return self.name.encode('utf-8')
 
     def __eq__(self, other):
         return self.id == other.id
+
 
 
 MFF = Team(9375,u"Malmö FF", "", "")

@@ -9,7 +9,27 @@ from collections import namedtuple
 
 from league import League
 from team import Team
-from commons import Date, IdentityObject
+from commons import Date
+
+
+
+
+class Arena(namedtuple('Arena', "id name")):
+    '''A tuple with an ID and a name'''
+    __slots__ = () 
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            data.get('id', None),
+            data.get('name', None)
+        )
+
+    def __repr__(self):
+        return u"Arena({})".format(map(repr,[self.name, self.id]))
+
+    def __eq__(self, other):
+        return self.id == other.id  
+
 
 
 
@@ -27,11 +47,14 @@ class Facts(namedtuple('Facts', "arena, spectators, referees, shots")):
     @classmethod
     def from_dict(cls, data):
         return cls(
-            IdentityObject.from_dict(data.get('arena', {})),
+            Arena.from_dict(data.get('arena', {})),
             data.get('spectators', None),
             data.get('referees', []), #list of names
             data.get('shots', None),
         )
+
+    def __repr__(self):
+        return "Facts({})".format(",".join(map(repr,[self.arena, self.spectators])))
 
 
 
@@ -55,6 +78,7 @@ class Event(object):
         self.id=id
         self._start_date=start_date
         self.round=round_
+        self.status=status
         self._hometeam=hometeam
         self._visitingteam=visitingteam
         self.hometeam_score=hometeam_score
@@ -86,9 +110,10 @@ class Event(object):
         data = api_client._fetchresource(endpoint)
         return cls.from_dict(api_client, data.get('event', {}))
 
-    def __str__(self):
-        return u"{:<20} v {:<20} at {} in {} [{}]".format(self.hometeam.name, self.visitingteam.name, self.start_date, self.league.name, self.league.sport.name).encode('utf-8')
+    def __repr__(self):
+        return "Event({})".format(",".join(map(repr, [self.start_date, self.hometeam, self.visitingteam, self.status, self.league])))
 
+ 
     @property        
     def start_date(self):
         return Date(self._start_date)

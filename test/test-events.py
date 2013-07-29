@@ -33,7 +33,7 @@ class TestEvents(unittest.TestCase):
 
 
     def test_sport(self):
-        football  = self.es.events.sport("Football")
+        football  = self.es.events.football()
         self.assertTrue(football)
 
 

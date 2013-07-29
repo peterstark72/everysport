@@ -6,7 +6,6 @@ Common Everysport classes and function.
 '''
 
 import datetime
-from collections import namedtuple
 
 class Date(datetime.datetime):
     '''Everysport Date object. Timezone is always CEST and it's created from the Everysport API Date format'''
@@ -15,22 +14,7 @@ class Date(datetime.datetime):
             d = datetime.datetime.strptime(data[0:16],"%Y-%m-%dT%H:%M" )
             return datetime.datetime.__new__(cls, d.year, d.month, d.day, d.hour, d.minute)
 
-
-
-class IdentityObject(namedtuple('IdentityObject', "id name")):
-    '''A tuple with an ID and a name'''
-    __slots__ = () 
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            data.get('id', None),
-            data.get('name', None)
-        )
-
-    def __str__(self):
-        return self.name.encode('utf-8')
-
-    def __eq__(self, other):
-        return self.id == other.id  
+    def __repr__(self):
+        return "Date({})".format(self.strftime("%Y%m%d"))
 
 

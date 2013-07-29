@@ -9,35 +9,17 @@ import urllib
 import urllib2
 import datetime
 import logging
-import hashlib
 import json
 
 
 from league import League
 from event import Event
+import simplecache as simplecache
 
 
-BASE_API_URL = "http://api.everysport.com/v1/{}"
+BASE_API_URL = "http://api.everysport.com/v1/{}?apikey={}"
 
-SPORT_ID_MAP = {
-'American Football': 18,
-'Badminton': 9,
-'Bandy': 3,
-'Baseball': 20,
-'Basket': 5,
-'Table Tennis': 8,
-'Bowling': 1,
-'Wrestling': 16,
-'Football': 10,
-'Handball': 7,
-'Floorball': 4,
-'Hockey': 2,
-'Rugby': 17,
-'Softball': 68,
-'Speedway': 15,
-'Squash': 22,
-'Tennis': 19,
-'Volleyball': 11}
+
 
 
 class EverysportException(Exception):
@@ -77,7 +59,8 @@ class Everysport(object):
         This only works for current leagues, on everysport.com today. To get older leagues, you need the ID and use getleague() method. 
 
         ''' 
-        for league in self.leagues.sport(sport):
+        spork_key = sport.lower()
+        for league in self.leagues.sport(SPORT_ID_MAP.get(spork_key, None)):
             if league.name == name:
                 return league  
 
@@ -101,23 +84,26 @@ class Everysport(object):
     def _fetchresource(self, endpoint, **params):
         '''Sends the Query and returns the response''' 
 
-        url = BASE_API_URL.format(endpoint) + "?apikey=" + self.apikey
-
         if params:
-            url += "&" + urllib.urlencode(params)
+            url = BASE_API_URL.format(endpoint, self.apikey) + "&" + urllib.urlencode(params)
+        else:
+            url = BASE_API_URL.format(endpoint, self.apikey)
 
 
         #Check if already in cache, else add it
-        key = hashlib.md5(url).hexdigest()
-        if key not in self._cache:
+        data = simplecache.geturl(url)
+        if data is not None:
+            return data
+        else:            
             try:
-                logging.debug("fetching {}".format(url))
                 response = urllib2.urlopen(url)
-                self._cache[key] = json.load(response)
-            except Exception as e:
+                data = json.load(response)
+                logging.debug("Fetched {} from {}".format(len(data), url))
+                simplecache.addurl(url, data)
+                return data
+            except Exception as e:                
                 raise EverysportException('Could not load {} with {} : \n{}'.format(url, params, e.message))
 
-        return self._cache[key]
 
 
     def _fetchpages(self, endpoint, entity_name, entity_func, **params):
@@ -144,16 +130,54 @@ class Everysport(object):
 
 
 
-class ApiQuery(object):
+SPORT_ID_MAP = {
+'american_football': 18,
+'badminton': 9,
+'bandy': 3,
+'baseball': 20,
+'basket': 5,
+'table_tennis': 8,
+'bowling': 1,
+'wrestling': 16,
+'football': 10,
+'handball': 7,
+'floorball': 4,
+'hockey': 2,
+'rugby': 17,
+'softball': 68,
+'speedway': 15,
+'squash': 22,
+'tennis': 19,
+'volleyball': 11}
+
+
+class SportQueryAccumulator:
+    def __init__(self, query_obj, sport_id):
+        self.query_obj = query_obj
+        self.sport_id = sport_id
+
+    def __repr__(self):
+        return self.sport_id
+
+    def __call__(self):
+        return self.query_obj.sport(self.sport_id)
+
+
+
+class ApiQuery:
     '''Abstract object for Queries against the API'''
 
     def __init__(self, api_client):
         self.api_client  = api_client
         self.params = {}
+
+        for name, value in SPORT_ID_MAP.items():
+            setattr(self, name, SportQueryAccumulator(self, value))
+
     
     def sport(self, *sports):
         '''Queries events for one or many sports, by Sport ID'''
-        self.params['sport'] = ",".join(map(str, [SPORT_ID_MAP[s] for s in sports if s in SPORT_ID_MAP]))
+        self.params['sport'] = ",".join(map(str, sports))
         return self
 
 

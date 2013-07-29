@@ -23,22 +23,15 @@ class Season(object):
         self.start = Date(start)
         self.end = Date(end)
 
-    def __str__(self):
-        return "{} - {}".format(self.start.strftime("%Y%m%d"), 
-                                self.end.strftime("%Y%m%d"))
+    def __repr__(self):
+        return "Season({})".format("-".join(map(repr,[self.start, self.end])))        
 
     def isactive(self):
         '''Returns True if the season is active today'''
         today = datetime.datetime.today()
         return (today > self.start and today < self.end)
 
-    def timeuntilend(self):
-        '''Returns the number of days until the season ends'''
-        days = (self.end - datetime.datetime.today()).days
-        if days < 0:
-            return 0
-        else:
-            return days
+
 
 
 

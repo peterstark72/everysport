@@ -14,13 +14,11 @@ def main():
     es = everysport.Everysport(EVERYSPORT_APIKEY)
 
     
-    allsvenskan = es.getleague_by_name("Allsvenskan", "Football")
+    allsvenskan = es.getleague_by_name("Allsvenskan", "football")
 
     #nhl = es.getleague_by_name("NHL", "Hockey")
 
     print allsvenskan.totals
-
-    print allsvenskan.getpositiontrends()
 
 
     

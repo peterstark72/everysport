@@ -49,13 +49,13 @@ From ```events``` you get query object that lets you select what kind of events 
 - ```finished()```
 - ```upcoming()```
 - ```leagues()```
-- ```sport()```
+- To filter a specific sport, you can use ```football()```, ```hockey()```, etc.
 
 For example: 
 
 ```python
 
-football_today = es.events.sport("Football").today()
+football_today = es.events.football().today()
 
 ``` 
 
@@ -68,7 +68,7 @@ for event in football_today:
 Or use ```fetch``` to get all back as one list (not recommended, the number of events may be large for some leagues):
 
 ```python
-all_hockey = es.events.sport("Hockey").leagues(everysport.SHL, everysport.NHL).fetch()
+all_hockey = es.events.leagues(everysport.SHL, everysport.NHL).fetch()
 ```
 
 In the same way you can query for leagues using ```leagues```.
@@ -76,9 +76,7 @@ In the same way you can query for leagues using ```leagues```.
 
 ```python
 
-hockey = es.leagues.sport("Hockey")
-
-for league in hockey:
+for league in es.leagues.hockey():
     print league
 
 ```
@@ -106,6 +104,7 @@ You access a league in the following way:
 ```python
 shl = es.league(everysport.SHL)
 ```
+
 
 Once you have the league you can start working with events:
 

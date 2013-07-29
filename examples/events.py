@@ -4,14 +4,12 @@
 import os
 import everysport
 
+es = everysport.Everysport(os.environ['EVERYSPORT_APIKEY'])
 
-EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
+for e in es.events.football().today():
+    print e
 
-es = everysport.Everysport(EVERYSPORT_APIKEY)
 
-
-for event in es.events.sport("Football").yesterday():
-    print event
 
 
 
