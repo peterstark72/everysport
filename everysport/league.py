@@ -86,7 +86,9 @@ class League(object):
 
     @property
     def season(self):
-        return Season(self._start_date, self._end_date)
+        '''The season the league is active'''
+        if self._start_date and self._end_date:
+            return Season(self._start_date, self._end_date)
 
     @property
     def name(self):
@@ -140,17 +142,6 @@ class League(object):
         if not self._round:
             self.current()
         return self.allevents.round(self._round).fetch()
-
-
-    @property
-    def results(self):
-        '''Returns list of results until the current round. If no round is set, you get all finished events until today.'''
-        q = self.api_client.events.leagues(self.id)
-        if self._round:
-            q = q.round(*range(1,self._round+1)).finished()
-        else:
-            q = q.finished()
-        return q.fetch()
 
 
     @property 
