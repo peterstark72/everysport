@@ -15,18 +15,6 @@ from season import Season
 
 
 
-'''
-    Leagues
-'''
-#Football
-ALLSVENSKAN = 57973
-SUPERETTAN = 57974
-
-#Hockey
-SWISS_LEAGUE = 58882
-SHL = 60243
-NHL = 58878
-
 
 
 class Sport(namedtuple('Sport', "id name")):

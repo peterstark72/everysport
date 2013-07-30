@@ -19,7 +19,7 @@ python setup.py install
 ```
 
 
-## Basic usage
+## Getting Started
 
 To start you need an API-key from support@everysport.com. See instructions and usage terms at https://github.com/menmo/everysport-api-documentation.
 
@@ -27,19 +27,57 @@ To start you need an API-key from support@everysport.com. See instructions and u
 With the API-key you create an ```Api``` instance. With the Api you can request a league, defined by an Everysport League ID, and start requesting events and standings for the league.
 
 ```python
-EVERYSPORT_APIKEY = os.environ['EVERYSPORT_APIKEY'] 
+APIKEY = os.environ['EVERYSPORT_APIKEY'] 
 
-es = everysport.Everysport(EVERYSPORT_APIKEY)
-
-for event in es.getleague(everysport.ALLSVENSKAN).events():
-    print event
-
-for standing in es.league(everysport.ALLSVENSKAN).standings():
-    print standing
-
+es = everysport.Everysport(APIKEY)
 ```
 
+
+## Getting League Standings
+
+To get standings for a league, you need to first get the league by League ID (as on everysport.com) or, for current leagues, by name and sport: 
+
+```python 
+
+#By name of current league
+allsvenskan = es.getleague_by_name("Allsvenskan", "football")
+nhl = es.getleague_by_name("NHL", "hockey")
+
+#By League ID from everysport.com
+shl = es.getleague(60243)
+```
+
+Once you have the league, you get standings in the following ways: 
+
+```python
+
+print allsvenskan.totals
+print allsvenskan.home
+print allsvenskan.away
+
+print allsvenskan.round(7).totals
+```
+
+Leagues like NHL, which has many different groups, are more complicated: 
+
+```python
+
+for group_type in nhl.standings.grouptypes(): # e.g. 'conference'
+    
+    for group in nhl.standings.groups(group_type): 
+        print group.upper()
+    
+        for standings in nhl.standings.group(group):
+            print standings 
+```
+
+
 ## Queries
+
+Create queries to get list of leagues and events. There are two types of queries: 
+
+- ```everysport.events```
+- ```everysport.leagues```
 
 From ```events``` you get query object that lets you select what kind of events you want to fetch, for example:
 - ```today()```
@@ -82,58 +120,6 @@ for league in es.leagues.hockey():
 ```
 
 The leagues are the current leagues, as seen on everysport.com. 
-
-
-## Leagues
-
-Leagues on Everysport are identified with a League ID, that can be looked up at everysport.com site, or by using the ```leagues``` query. 
-
-Here are som League IDs for common leagues:
-
-```
-#Football
-ALLSVENSKAN = 57973
-SUPERETTAN = 57974
-
-#Hockey
-SHL = 60243
-NHL = 58878
-```
-
-You access a league in the following way: 
-```python
-shl = es.league(everysport.SHL)
-```
-
-
-Once you have the league you can start working with events:
-
-```python
-
-for event in sorted(shl.events, key = lambda e:e.hometeam.name):
-    print event
-```
-
-And with standings:
-
-```python
-
-nhl = es.league(everysport.NHL).standings
-
-print nhl #Complete league, all teams
-
-
-for g in nhl.groups(): 
-    print g 
-
-
-for g in nhl.groups('conference'): 
-    print g #Conferences
-
-
-print nhl.group("Western Conference")
-
-```
 
 
 
