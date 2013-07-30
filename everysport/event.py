@@ -20,12 +20,12 @@ class Arena(namedtuple('Arena', "id name")):
     @classmethod
     def from_dict(cls, data):
         return cls(
-            data.get('id', None),
-            data.get('name', None)
+            data.get('id', ""),
+            data.get('name', "")
         )
 
     def __repr__(self):
-        return u"Arena({})".format(map(repr,[self.name, self.id]))
+        return "Arena({})".format(",".join([self.name.encode('utf-8'), str(self.id)]))
 
     def __eq__(self, other):
         return self.id == other.id  
@@ -127,6 +127,13 @@ class Event(object):
     def visitingteam(self):
         if self._visitingteam:
             return Team.from_dict(self._visitingteam)
+
+
+    @property
+    def arena(self):
+        '''The arena where the event takes place'''
+        if self._facts: 
+            return Arena.from_dict(self._facts.get('arena', {}))
 
     @property
     def facts(self):
