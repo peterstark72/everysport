@@ -9,8 +9,7 @@ from collections import namedtuple
 
 from league import League
 from team import Team
-from commons import Date
-
+from commons import Date, SportName
 
 
 
@@ -21,11 +20,11 @@ class Arena(namedtuple('Arena', "id name")):
     def from_dict(cls, data):
         return cls(
             data.get('id', ""),
-            data.get('name', "")
+            SportName(data.get('name', None), None, None)
         )
 
     def __repr__(self):
-        return "Arena({})".format(",".join([self.name.encode('utf-8'), str(self.id)]))
+        return "Arena({})".format(",".join(map(repr, [self.name, self.id])))
 
     def __eq__(self, other):
         return self.id == other.id  
@@ -133,7 +132,9 @@ class Event(object):
     def arena(self):
         '''The arena where the event takes place'''
         if self._facts: 
-            return Arena.from_dict(self._facts.get('arena', {}))
+            a = self._facts.get("arena", None) 
+            if a:
+                return Arena.from_dict(a)
 
     @property
     def facts(self):

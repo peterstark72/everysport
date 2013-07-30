@@ -8,9 +8,9 @@ Everysport teams are defined with an ID. They always have a name, and may also h
 '''
 
 from collections import namedtuple
+from commons import SportName
 
-
-class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
+class Team(namedtuple('Team', "id name")):
     '''Team object
 
     Properties:
@@ -25,13 +25,15 @@ class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
     def from_dict(cls, data):
         return cls(
             data.get('id', None),
-            data.get('name', None),
-            data.get('short_name', None),
-            data.get('abbreviation', None)
+            SportName(
+                data.get('name', None),
+                data.get('short_name', None),
+                data.get('abbreviation', None)
+                )
         )
 
     def __repr__(self):
-        return "Team({})".format(self.name.encode('utf-8'))
+        return "Team({})".format(self.name)
 
 
     def __eq__(self, other):
@@ -39,8 +41,15 @@ class Team(namedtuple('Team', "id, name, short_name, abbreviation")):
 
 
 
-MFF = Team(9375,u"Malmö FF", "", "")
-HIF = Team(9373,u"Helingsborgs IF", "", "")
-LSD = Team(1175,u"Leksand", "", "")
-CHI = Team(28075,u"Chicago Blackhawks", "", "")
+if __name__ == '__main__':
+    MFF = Team(9375,SportName(u"Malmö FF", None, None))
+    HIF = Team(9373,SportName(u"Helingsborgs IF", None, None))
+    LSD = Team(1175,SportName(u"Leksand", None, None))
+    CHI = Team(28075,SportName(u"Chicago Blackhawks", None, None))
+
+
+    print MFF
+
+
+
         

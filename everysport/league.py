@@ -13,6 +13,7 @@ from collections import namedtuple
 from standings import Standings
 from season import Season
 
+from commons import SportName
 
 
 
@@ -93,7 +94,7 @@ class League(object):
     @property
     def name(self):
         if self._name:
-            return self._name
+            return SportName(self._name, None, None)
 
     @property
     def sport(self):
@@ -160,3 +161,8 @@ class League(object):
     def roundslist(self):
         '''The list of the rounds for which at least one event has finished''' 
         return {e.round for e in self.allevents.finished()}
+
+
+
+
+

@@ -14,9 +14,9 @@ es = everysport.Everysport(APIKEY)
 
 for league in es.leagues:
     if league.season:
-        print "{} : {}, {} -- {}".format(league.sport.name.encode('utf-8'),league.name.encode('utf-8'), league.season.starts("%y-%m-%d"), league.season.ends("%y-%m-%d"))
+        print "{} : {}, {} -- {}".format(league.sport.name,league.name, league.season.starts("%y-%m-%d"), league.season.ends("%y-%m-%d"))
     else:
-        print "{} : {},".format(league.sport.name.encode('utf-8'), league.name.encode('utf-8'))
+        print "{} : {},".format(league.sport.name, league.name)
 
 
 

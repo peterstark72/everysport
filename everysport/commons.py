@@ -6,6 +6,8 @@ Common Everysport classes and function.
 '''
 
 import datetime
+from collections import namedtuple
+
 
 class Date(datetime.datetime):
     '''Everysport Date object. Timezone is always CEST and it's created from the Everysport API Date format'''
@@ -17,4 +19,28 @@ class Date(datetime.datetime):
     def __repr__(self):
         return "Date({})".format(self.strftime("%Y%m%d"))
 
+
+
+class SportName(namedtuple('SportName', "fullname shortname abbr")):
+    '''A SportName such as a team, league'''
+    __slots__ = ()
+
+    def __repr__(self):
+        return self.fullname.encode('utf-8')
+
+
+
+
+if __name__ == '__main__':
+    
+    n = u"Djurgården"     
+    print repr(n)
+    print n.encode('utf-8')
+    #print n #does not work
+
+
+    sn = SportName(n, None, None)
+    print sn
+    print sn.abbr
+    #print sn.name #Does not work
 
