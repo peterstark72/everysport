@@ -18,7 +18,7 @@ for e in es.events.today():
 
 # Find out when football season ends
 for league in es.leagues.football():
-    print league.name.encode('utf-8'), league.season.ends("%d/%m")
+    print league.name.encode('utf-8'), league.season.ends("%d / %m")
 
 
 

@@ -22,18 +22,22 @@ class Season(object):
         self._end = Date(end)
 
     def __repr__(self):
-        return "Season({})".format("-".join(map(repr,[self.start, self.end])))        
+        return "Season({})".format("-".join([self.starts(), self.ends()]))        
 
     def ends(self, format="%Y%m%d"):
         '''The date the season ends'''
         if self._end:
             return self._end.strftime(format)
+        else:
+            return "?"
 
 
     def starts(self, format="%Y%m%d"):
         '''The date the season starts'''
         if self._start:
             return self._start.strftime(format)
+        else:
+            return "?"
 
 
 

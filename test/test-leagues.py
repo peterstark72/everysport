@@ -6,7 +6,6 @@ import os
 
 
 import everysport
-from everysport.league import ALLSVENSKAN, NHL
 
 
 
@@ -17,17 +16,18 @@ class TestLeagues(unittest.TestCase):
 
 
     def test_allsvenskan(self):
-        allsvenskan = self.es.getleague(ALLSVENSKAN)
+        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
         self.assertTrue(allsvenskan) 
 
 
     def test_season(self):
-        allsvenskan = self.es.getleague(ALLSVENSKAN)
-        self.assertTrue(allsvenskan.season.isactive())   
+        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
+        self.assertTrue(allsvenskan.season)  
+        
 
 
     def test_sport(self):
-        hockey = self.es.leagues.sport("Hockey")
+        hockey = self.es.leagues.hockey()
         for league in hockey:
             self.assertEqual(league.sport.id, 2) 
 

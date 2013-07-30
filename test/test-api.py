@@ -5,7 +5,7 @@ import unittest
 import everysport
 import os
 
-from everysport.league import ALLSVENSKAN
+
 
 
 class TestApi(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestApi(unittest.TestCase):
     def test_api2(self):
         es = everysport.Everysport("foo")
         with self.assertRaises(everysport.EverysportException):
-            es.getleague(ALLSVENSKAN)
+            es.getleague(everysport.ALLSVENSKAN) #Allsvenskan 
 
 
 
