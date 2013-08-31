@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''Example use of everysport.events queries'''
+'''Example use of game events: goals'''
 
 import os
+
 import everysport
+
 
 APIKEY = os.environ['EVERYSPORT_APIKEY']
 
 es = everysport.Everysport(APIKEY)
 
 
-for e in es.events.football().today():
-    print e
+games = es.events.leagues(57973).finished().allfields().fetch()
 
 
+for goal in games.goals:
+    print goal
 
 
 
