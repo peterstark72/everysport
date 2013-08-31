@@ -1,18 +1,25 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-'''Example ise of everysport.leagues query'''
+'''Example use of leagues query'''
 
 import os
+
 import everysport
 
 APIKEY = os.environ['EVERYSPORT_APIKEY']
-
 es = everysport.Everysport(APIKEY)
 
-for league in es.leagues.hockey():
+#Get leagues query
+q = es.get_leagues_query()
+
+#Print all current swedish hockey leagues
+for league in q.hockey().sweden():
     print league
 
 
+
+#Print all current swedish football leagues
+for league in q.football().sweden():
+    print league
 
 
 

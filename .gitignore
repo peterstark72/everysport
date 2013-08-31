@@ -51,3 +51,12 @@ nosetests.xml
 
 #PyCharm
 .idea
+
+#R
+.RData
+.Rhistory
+
+
+#CSV
+*.csv
+

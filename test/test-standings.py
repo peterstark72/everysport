@@ -6,8 +6,6 @@ import os
 
 
 import everysport
-from everysport.team import MFF
-
 
 class TestStandings(unittest.TestCase):
 
@@ -16,13 +14,28 @@ class TestStandings(unittest.TestCase):
         
 
     def test_allsvenskan(self):
-        allsvenskan = self.es.getleague_by_name("Allsvenskan", "Football")
+        allsvenskan = self.es.get_standings(everysport.ALLSVENSKAN)
         self.assertTrue(allsvenskan) 
 
-    def test_standings(self):
-        allsvenskan = self.es.getleague_by_name("Allsvenskan", "Football").round(17).standings
-        self.assertTrue(2, allsvenskan.getteamposition(MFF)) 
 
+    def test_teams(self):
+        allsvenskan = self.es.get_standings(everysport.ALLSVENSKAN)
+        self.assertTrue(allsvenskan.teams) 
+
+
+    def test_round(self):
+        allsvenskan = self.es.get_standings(
+                            everysport.ALLSVENSKAN, 
+                            r=1)
+        self.assertTrue(allsvenskan) 
+
+
+    def test_type(self):
+        allsvenskan = self.es.get_standings(
+                            everysport.ALLSVENSKAN, 
+                            r=1, 
+                            t="home")
+        self.assertTrue(allsvenskan) 
 
 
 

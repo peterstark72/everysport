@@ -10,7 +10,7 @@ APIKEY = os.environ['EVERYSPORT_APIKEY']
 es = everysport.Everysport(APIKEY)
 
 
-for e in es.events.football().today():
+for e in es.get_events_query().football().today():
     print e
 
 

@@ -16,20 +16,21 @@ class TestLeagues(unittest.TestCase):
 
 
     def test_allsvenskan(self):
-        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
+        allsvenskan = self.es.get_league(everysport.ALLSVENSKAN)
         self.assertTrue(allsvenskan) 
 
 
     def test_season(self):
-        allsvenskan = self.es.getleague(everysport.ALLSVENSKAN)
-        self.assertTrue(allsvenskan.season)  
+        allsvenskan = self.es.get_league(everysport.ALLSVENSKAN)
+        self.assertTrue(allsvenskan['startDate'])  
+        self.assertTrue(allsvenskan['endDate'])  
         
 
 
     def test_sport(self):
         hockey = self.es.leagues.hockey()
         for league in hockey:
-            self.assertEqual(league.sport.id, 2) 
+            self.assertEqual(league['sport']['id'], 2) 
 
 
 
