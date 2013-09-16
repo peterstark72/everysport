@@ -49,6 +49,7 @@ class Everysport(object):
         response = _get_resource(endpoint, apikey=self.apikey) 
         return response.get('league', {})
 
+
     @property
     def leagues(self):
         '''Returns a LeaguesQuery'''
@@ -92,6 +93,7 @@ class Everysport(object):
                                 round=r, 
                                 type=t)
         return StandingsGroupsList(response.get('groups', []))
+
 
 
 SPORT_ID_MAP = {
