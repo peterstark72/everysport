@@ -275,6 +275,11 @@ class EventsQuery(ApiQuery):
         self.params['status'] = "UPCOMING"
         return self
 
+    def ongoing(self):
+        '''Queries for all ongoing events'''
+        self.params['status'] = "ONGOING"
+        return self
+
     def finished(self):
         '''Queries for all finished events'''
         self.params['status'] = "FINISHED"
