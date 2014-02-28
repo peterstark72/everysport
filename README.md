@@ -75,6 +75,7 @@ Create queries to get list of leagues and events. There are two types of queries
 From ```events``` you get query object that lets you select what kind of events you want to fetch, for example:
 
 - ```today()```
+- ```ongoing()```
 - ```fromdate()```
 - ```todate()```
 - ```round()```
