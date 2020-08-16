@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 '''everysport.py
 
 
@@ -7,11 +5,10 @@
 
 import datetime
 import urllib
-import urllib2
 import json
 import functools
 import logging
-
+import requests
 
 
 class EverysportException(Exception):
@@ -335,16 +332,11 @@ def _get_resource(endpoint, **params):
 
     BASE_API_URL = "http://api.everysport.com/v1/{}"
 
-    url = BASE_API_URL.format(endpoint) + "?" + urllib.urlencode(params)    
-
     try:
-        response = urllib2.urlopen(url)
-        logging.debug("Getting {}".format(url))
-        return json.load(response)
-
-    except Exception as e:                
-        raise EverysportException('Could not load {} with {} : \n{}'.format(url, params, e.message))
-
+        response = requests.get(BASE_API_URL.format(endpoint), params=params)
+        return response.json()
+    except Exception as e:
+        raise EverysportException('Could not load {} : \n{}'.format(params, e.message))
 
 
 def _fetch_pages(endpoint, entity, **params):
